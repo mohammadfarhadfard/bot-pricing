@@ -1,0 +1,17 @@
+{
+  "name": "telegram",
+  "version": "1.0.0",
+  "description": "",
+  "main": "tel-api.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1",
+    "path": "^0.12.7",
+    "telegraf": "^4.15.0"
+  }
+}
