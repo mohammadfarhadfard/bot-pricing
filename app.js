@@ -4,10 +4,10 @@ const token = '6775787608:AAF2d7l05TtGQTXL12dTyhPyKjFqr9fuIvc'
 const bot = new TelegramBot(token , {polling : true})
 
 bot.onText(/\/start/ ,msg => {
-  // console.log(msg);
   bot.sendMessage(msg.chat.id , 'سلام , برای اطلاع از قیمت لحظه ای ارز مورد نظر را انتخاب کنید!' ,{
     reply_markup : {
       'keyboard' : [
+        ['USDT/IRT | تتر'],
         ['BTC | بیتکوین' , 'ETH | اتریوم'],
         ['BNB | بایننس' , 'XRP | ریپل'],
         ['SOL | سولانا' , 'ADA | کاردانو']
@@ -16,6 +16,28 @@ bot.onText(/\/start/ ,msg => {
   })
 })
     setInterval(() => {
+
+      let nobitex='https://api.nobitex.ir/v2/orderbook/USDTIRT'
+
+      axios.get(nobitex)
+      .then( function(response) {
+         USDT_price = response.data.lastTradePrice
+       })
+      .catch(error => {
+      console.log("err: " +error)
+      }) 
+
+      let date="https://api.keybit.ir/time"
+
+    axios.get(date)
+    .then( function(response) {
+         date_now= response.data.time24.full.en
+         location_now=response.data.timezone.name 
+    })
+    .catch(error => {
+     console.log("err: " +error)
+    })
+
       let kucoinApi_BTC="https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=BTC-USDT"
     axios.get(kucoinApi_BTC)
     .then( response => {
@@ -74,7 +96,9 @@ bot.onText(/\/start/ ,msg => {
 
 
   bot.on('message' , msg => {
-  if(msg.text == 'BTC | بیتکوین'){  
+  if(msg.text == 'USDT/IRT | تتر'){
+   bot.sendMessage(msg.chat.id , `قیمت لحظه ای : ${USDT_price}  \n${date_now} \n${location_now}`)
+    } else if(msg.text == 'BTC | بیتکوین'){  
     bot.sendMessage(msg.chat.id ,`قیمت لحظه ای : ${BTC_price} `)
   }else if(msg.text == 'ETH | اتریوم'){
     bot.sendMessage(msg.chat.id , `قیمت لحظه ای : ${ETH_price} `)
