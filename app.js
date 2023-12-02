@@ -15,8 +15,8 @@ bot.onText(/\/start/ ,msg => {
     }
   })
 })
-
-    let kucoinApi_BTC="https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=BTC-USDT"
+    setInterval(() => {
+      let kucoinApi_BTC="https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=BTC-USDT"
     axios.get(kucoinApi_BTC)
     .then( response => {
          BTC_price = response.data.data.price
@@ -69,6 +69,8 @@ bot.onText(/\/start/ ,msg => {
     .catch(error => {
      console.log("err: " +error)
     })
+    } , 2500)
+    
 
 
   bot.on('message' , msg => {
