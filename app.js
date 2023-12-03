@@ -1,7 +1,8 @@
 const TelegramBot = require('node-telegram-bot-api')
 const axios = require('axios')
-const token = '6775787608:AAF2d7l05TtGQTXL12dTyhPyKjFqr9fuIvc'
-const bot = new TelegramBot(token , {polling : true})
+require('dotenv').config()
+let TOKEN = process.env.BOT_TOKEN
+const bot = new TelegramBot(TOKEN , {polling : true})
 
 bot.onText(/\/start/ ,msg => {
   bot.sendMessage(msg.chat.id , 'سلام , برای اطلاع از قیمت لحظه ای ارز مورد نظر را انتخاب کنید!' ,{
