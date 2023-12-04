@@ -5,7 +5,7 @@ let TOKEN = process.env.BOT_TOKEN
 const bot = new TelegramBot(TOKEN , {polling : true})
 
 bot.onText(/\/start/ ,msg => {
-  bot.sendMessage(msg.chat.id , 'سلام , برای اطلاع از قیمت لحظه ای ارز مورد نظر را انتخاب کنید!' ,{
+  bot.sendMessage(msg.chat.id , 'سلام , برای اطلاع از قیمت لحظه ای , ارز مورد نظر خود را انتخاب کنید!' ,{
     reply_markup : {
       'keyboard' : [
         ['USDT/IRT | تتر'],
@@ -113,6 +113,6 @@ bot.onText(/\/start/ ,msg => {
   }else if(msg.text == 'ADA | کاردانو'){
     bot.sendMessage(msg.chat.id , `قیمت لحظه ای : ${ADA_price} `)
   }else if(msg.text == 'لیست قیمت ارز های دیجیتال'){
-    bot.sendMessage(msg.chat.id , `در حال تکمیل`)
+    bot.sendMessage(msg.chat.id , `برای اطلاع از قیمت ارز های دیجیتال به کانال ما مراجعه کنید \n@t.me/myTestApisjd`)
   }
 })
