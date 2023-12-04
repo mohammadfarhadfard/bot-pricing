@@ -11,7 +11,8 @@ bot.onText(/\/start/ ,msg => {
         ['USDT/IRT | تتر'],
         ['BTC | بیتکوین' , 'ETH | اتریوم'],
         ['BNB | بایننس' , 'XRP | ریپل'],
-        ['SOL | سولانا' , 'ADA | کاردانو']
+        ['SOL | سولانا' , 'ADA | کاردانو'],
+        ['لیست قیمت ارز های دیجیتال']
       ]
     }
   })
@@ -109,7 +110,9 @@ bot.onText(/\/start/ ,msg => {
     bot.sendMessage(msg.chat.id , `قیمت لحظه ای : ${XRP_price} `)
   }else if(msg.text == 'SOL | سولانا'){
     bot.sendMessage(msg.chat.id , `قیمت لحظه ای : ${SOL_price} `)
-  }else{
+  }else if(msg.text == 'ADA | کاردانو'){
     bot.sendMessage(msg.chat.id , `قیمت لحظه ای : ${ADA_price} `)
+  }else if(msg.text == 'لیست قیمت ارز های دیجیتال'){
+    bot.sendMessage(msg.chat.id , `در حال تکمیل`)
   }
 })
