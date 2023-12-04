@@ -113,5 +113,3 @@ bot.onText(/\/start/ ,msg => {
     bot.sendMessage(msg.chat.id , `قیمت لحظه ای : ${ADA_price} `)
   }
 })
-
-console.log('ok');
