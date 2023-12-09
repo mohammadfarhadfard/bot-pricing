@@ -7,8 +7,8 @@
 
 > [!NOTE]
 > In this application, there is a variable named TOKEN.
- 
- 
+> This variable contains the Telegram bot token, which is stored in the .env file with the name .BOT_TOKEN. 
+
  
 
 > I'm currently adding more features to the bot
