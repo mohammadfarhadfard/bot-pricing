@@ -13,10 +13,10 @@
 * `BOT_TOKEN= 'your bot token'`
 
 #### Dependencies:
-- "axios": "^1.6.2"
-- "dotenv": "^16.3.1"
-- "path": "^0.12.7"
-- "telegraf": "^4.15.0"
+- axios : 1.6.2
+- dotenv : 16.3.1
+- path : 0.12.7
+- telegraf : 4.15.0
 
 about [axios](https://axios-http.com/)
 
