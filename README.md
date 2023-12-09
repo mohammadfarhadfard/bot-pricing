@@ -9,7 +9,8 @@
 > In this application, there is a variable named TOKEN.
 > This variable contains the Telegram bot token, which is stored in the .env file with the name .BOT_TOKEN. 
 
- 
+### .env.example
+* `BOT_TOKEN= '${your bot token}'`
 
 > I'm currently adding more features to the bot
 
