@@ -5,7 +5,7 @@ let TOKEN = process.env.BOT_TOKEN
 const bot = new TelegramBot(TOKEN , {polling : true})
 
 bot.onText(/\/start/ ,msg => {
-  bot.sendMessage(msg.chat.id , 'سلام , برای اطلاع از قیمت لحظه ای , ارز مورد نظر خود را انتخاب کنید!' ,{
+  bot.sendMessage(msg.chat.id , `سلام ${msg.from.first_name} , برای اطلاع از قیمت لحظه ای , ارز مورد نظر خود را انتخاب کنید!` ,{
     reply_markup : {
       'keyboard' : [
         ['USDT/IRT | تتر'],
@@ -17,6 +17,12 @@ bot.onText(/\/start/ ,msg => {
     }
   })
 })
+
+
+    const moment = require('jalali-moment');
+    const date = moment().locale('fa').format('YYYY/M/D hh:mm');
+
+
     setInterval(() => {
 
       let nobitex='https://api.nobitex.ir/v2/orderbook/USDTIRT'
@@ -29,16 +35,7 @@ bot.onText(/\/start/ ,msg => {
       console.log("err: " +error)
       }) 
 
-      let date="https://api.keybit.ir/time"
-
-    axios.get(date)
-    .then( function(response) {
-         date_now= response.data.time24.full.en
-         location_now=response.data.timezone.name 
-    })
-    .catch(error => {
-     console.log("err: " +error)
-    })
+   
 
       let kucoinApi_BTC="https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=BTC-USDT"
     axios.get(kucoinApi_BTC)
@@ -99,7 +96,7 @@ bot.onText(/\/start/ ,msg => {
 
   bot.on('message' , msg => {
   if(msg.text == 'USDT/IRT | تتر'){
-   bot.sendMessage(msg.chat.id , `قیمت لحظه ای : ${USDT_price}  \n${date_now} \n${location_now}`)
+   bot.sendMessage(msg.chat.id , `قیمت لحظه ای : ${USDT_price} \n \n${date}`)
     } else if(msg.text == 'BTC | بیتکوین'){  
     bot.sendMessage(msg.chat.id ,`قیمت لحظه ای : ${BTC_price} `)
   }else if(msg.text == 'ETH | اتریوم'){
@@ -113,6 +110,6 @@ bot.onText(/\/start/ ,msg => {
   }else if(msg.text == 'ADA | کاردانو'){
     bot.sendMessage(msg.chat.id , `قیمت لحظه ای : ${ADA_price} `)
   }else if(msg.text == 'لیست کامل قیمت ارز های دیجیتال'){
-    bot.sendMessage(msg.chat.id , `برای اطلاع از قیمت ارز های دیجیتال به کانال ما مراجعه کنید \n@t.me/myTestApisjd`)
+    bot.sendMessage(msg.chat.id , `برای اطلاع از قیمت ارز های دیجیتال به کانال ما مراجعه کنید \n \n@t.me/myTestApisjd`)
   }
 })
