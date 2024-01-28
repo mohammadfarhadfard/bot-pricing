@@ -12,7 +12,7 @@ bot.onText(/\/start/ ,msg => {
         ['BTC | بیتکوین' , 'ETH | اتریوم'],
         ['BNB | بایننس' , 'XRP | ریپل'],
         ['SOL | سولانا' , 'ADA | کاردانو'],
-        ['لیست کامل قیمت ارز های دیجیتال']
+        [' 💲 لیست کامل قیمت ارز های دیجیتال']
       ]
     }
   })
@@ -96,7 +96,7 @@ bot.onText(/\/start/ ,msg => {
 
   bot.on('message' , msg => {
   if(msg.text == 'USDT/IRT | تتر'){
-   bot.sendMessage(msg.chat.id , `قیمت لحظه ای : ${USDT_price} \n \n${date}`)
+   bot.sendMessage(msg.chat.id , `قیمت لحظه ای : ${USDT_price} \n  \n 🗓 ${date}`)
     } else if(msg.text == 'BTC | بیتکوین'){  
     bot.sendMessage(msg.chat.id ,`قیمت لحظه ای : ${BTC_price} `)
   }else if(msg.text == 'ETH | اتریوم'){
