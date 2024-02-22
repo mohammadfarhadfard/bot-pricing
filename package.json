@@ -15,7 +15,6 @@
     "jalali-moment": "^3.3.11",
     "node-telegram-bot-api": "^0.64.0",
     "nodemon": "^3.0.3",
-    "path": "^0.12.7",
-    "telegraf": "^4.15.0"
+    "path": "^0.12.7"
   }
 }
