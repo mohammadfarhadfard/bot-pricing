@@ -12,7 +12,7 @@ bot.onText(/\/start/ ,msg => {
     reply_markup : {
       'resize_keyboard' : true,
       'keyboard' : [
-        ['USDT/IRT | قیمت تتر','💰 قیمت ارز های دیجیتال'],
+        ['USDT/IRR | قیمت تتر','💰 قیمت ارز های دیجیتال'],
         ['💵 دلار | یورو | پوند'],
         ['🌕 سکه','🛢️ نفت']
       ]
@@ -152,18 +152,38 @@ oilKey.forEach((key) => {
     axios.get(oilPrice)
     .then(function(response){
       if(oilPrice == `https://raw.githubusercontent.com/margani/pricedb/main/tgju/current/oil_opec/latest.json`){
-        
+        global.oil_opec = response.data.p
+        global.oil_opec_t = response.data.t
+      }else if(oilPrice == `https://raw.githubusercontent.com/margani/pricedb/main/tgju/current/oil_brent/latest.json`){
+        global.oil_brent = response.data.p
+        global.oil_brent_t = response.data.t
+      }else{
+        global.oil_WTI = response.data.p
+        global.oil_WTI_t = response.data.t
       }
+    })
+    .catch(error => {
+      console.log("err :" + error);
     })
   }, 6*1000);
 })
 
 
 
+//oli message
+hr = `ــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ`
+setInterval(() => {
+  oliMessage = `🔸 قیمت ها به دلار است\n \n \n ▪️ نفت(opec) : ${global.oil_opec} دلار \n \n ⏰ زمان ثبت آخرین نرخ : ${global.oil_opec_t} \n \n${hr} \n
+▪️ نفت(brent) : ${global.oil_brent} دلار \n \n ⏰ زمان ثبت آخرین نرخ : ${global.oil_brent_t} \n \n${hr} \n
+▪️ نفت(WTI) : ${global.oil_WTI} دلار \n \n ⏰ زمان ثبت آخرین نرخ : ${global.oil_WTI_t} \n \n \n 🗓 ${date}`
+}, 2*1000);
+
+
+
 //coin message
 hr = `ــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ`
 setInterval(() => {
-  coinMessage =`قیمت سکه : \n \n \n 🌕 سکه امامی : \n \n  💵 قیمت کنونی         📉 بیشترین قیمت         📈 کمترین قیمت \n 
+  coinMessage =`قیمت سکه : \n \n \n🔸 قیمت ها به ریال است \n\n\n🌕 سکه امامی : \n \n  💵 قیمت کنونی         📉 بیشترین قیمت         📈 کمترین قیمت \n 
           ${global.sekeEm_min}           ${global.sekeEm_max}             ${global.sekeEm} \n \n \n⏰ زمان ثبت آخرین نرخ : ${global.sekeEm_s} \n \n                    ${hr} \n
   🌕 سکه بهار آزادی : \n \n  💵 قیمت کنونی         📉 بیشترین قیمت         📈 کمترین قیمت \n 
           ${global.sekeB_min}           ${global.sekeB_max}             ${global.sekeB} \n \n \n⏰ زمان ثبت آخرین نرخ : ${global.sekeB_s} \n \n                    ${hr} \n
@@ -179,21 +199,18 @@ setInterval(() => {
 
 //dollar,eur,gbp message
 setInterval(() => {
-  dollarMessage = `| USD-IRR |\n \n \n نرخ فعلی : ${global.dollar} \n \n بالاترین قیمت روز : ${global.dollar_max}
+  dollarMessage = `| USD-IRR |\n🔸 قیمت ها به ریال است \n \n \n نرخ فعلی : ${global.dollar} \n \n بالاترین قیمت روز : ${global.dollar_max}
     \n پایین ترین قیمت روز : ${global.dollar_min} \n \n بیشترین مقدار نوسان روز : ${global.dollar_swing}
     \n درصد بیشترین نوسان روز : ${global.dollar_Percent} \n \n زمان ثبت آخرین نرخ : ${global.dollar_s} \n \n \n 🗓 ${date}`
-}, 2*1000);
 
-setInterval(() => {
-  eurMessage = `| EUR-IRR |\n \n \n نرخ فعلی : ${global.eur} \n \n بالاترین قیمت روز : ${global.eur_max}
+    eurMessage = `| EUR-IRR |\n🔸 قیمت ها به ریال است \n \n \n نرخ فعلی : ${global.eur} \n \n بالاترین قیمت روز : ${global.eur_max}
     \n پایین ترین قیمت روز : ${global.eur_min} \n \n بیشترین مقدار نوسان روز : ${global.eur_swing}
     \n درصد بیشترین نوسان روز : ${global.eur_Percent} \n \n زمان ثبت آخرین نرخ : ${global.eur_s} \n \n \n 🗓 ${date}`
-}, 2*1000);
 
-setInterval(() => {
-  gbpMessage = `| GBP-IRR |\n \n \n نرخ فعلی : ${global.gbp} \n \n بالاترین قیمت روز : ${global.gbp_max}
+    gbpMessage = `| GBP-IRR |\n🔸 قیمت ها به ریال است \n \n \n نرخ فعلی : ${global.gbp} \n \n بالاترین قیمت روز : ${global.gbp_max}
     \n پایین ترین قیمت روز : ${global.gbp_min} \n \n بیشترین مقدار نوسان روز : ${global.gbp_swing}
     \n درصد بیشترین نوسان روز : ${global.gbp_Percent} \n \n زمان ثبت آخرین نرخ : ${global.gbp_s} \n \n \n 🗓 ${date}`
+
 }, 2*1000);
 
 
@@ -211,11 +228,11 @@ setInterval(function makeMsg(){
 
 
 
-//response and menu
+//response and menu and tether message
 let pr_text = 'بازگشت به منوی اصلی'
 bot.on('message' , msg => {
-  if(msg.text == 'USDT/IRT | قیمت تتر'){
-    bot.sendMessage(msg.chat.id , `قیمت لحظه ای : ${USDT_price} \n  \n 🗓 ${date}`)
+  if(msg.text == 'USDT/IRR | قیمت تتر'){
+    bot.sendMessage(msg.chat.id , `قیمت لحظه ای : ${USDT_price} ریال\n  \n 🗓 ${date}`)
   }else if(msg.text == '💰 قیمت ارز های دیجیتال'){
     bot.sendMessage(msg.chat.id , `${message}`)
   }else if(msg.text == '💵 دلار | یورو | پوند'){
@@ -240,7 +257,7 @@ bot.on('message' , msg => {
       reply_markup : {
         'resize_keyboard' : true,
         'keyboard' : [
-          ['USDT/IRT | قیمت تتر','💰 قیمت ارز های دیجیتال'],
+          ['USDT/IRR | قیمت تتر','💰 قیمت ارز های دیجیتال'],
           ['💵 دلار | یورو | پوند'],
           ['🌕 سکه','🛢️ نفت']
         ]
@@ -249,6 +266,6 @@ bot.on('message' , msg => {
   }else if(msg.text == '🌕 سکه'){
     bot.sendMessage(msg.chat.id , `${coinMessage}`)
   }else if(msg.text == '🛢️ نفت'){
-    bot.sendMessage(msg.chat.id , )
+    bot.sendMessage(msg.chat.id , `${oliMessage}`)
   }
 })
