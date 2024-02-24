@@ -8,7 +8,7 @@ const bot = new TelegramBot(TOKEN , {polling : true})
 
 //main menu
 bot.onText(/\/start/ ,msg => {
-  bot.sendMessage(msg.chat.id , `سلام ${msg.from.first_name}  چه کاری برات انجام بدم؟` ,{
+  bot.sendMessage(msg.chat.id , `سلام ${msg.from.first_name}  چه کاری برات انجام بدم؟` ,{reply_to_message_id: msg.message_id},{
     reply_markup : {
       'resize_keyboard' : true,
       'keyboard' : [
@@ -232,9 +232,9 @@ setInterval(function makeMsg(){
 let pr_text = 'بازگشت به منوی اصلی'
 bot.on('message' , msg => {
   if(msg.text == 'USDT/IRR | قیمت تتر'){
-    bot.sendMessage(msg.chat.id , `قیمت لحظه ای : ${USDT_price} ریال\n  \n 🗓 ${date}`)
+    bot.sendMessage(msg.chat.id , `قیمت لحظه ای : ${USDT_price} ریال\n  \n 🗓 ${date}`,{reply_to_message_id: msg.message_id})
   }else if(msg.text == '💰 قیمت ارز های دیجیتال'){
-    bot.sendMessage(msg.chat.id , `${message}`)
+    bot.sendMessage(msg.chat.id , `${message}`,{reply_to_message_id: msg.message_id})
   }else if(msg.text == '💵 دلار | یورو | پوند'){
     bot.sendMessage(msg.chat.id , `انتخاب کنید`,{
       reply_markup : {
@@ -247,13 +247,13 @@ bot.on('message' , msg => {
       }
     })
   }else if (msg.text == `دلار(USD)`){
-    bot.sendMessage(msg.chat.id , `${dollarMessage}`)
+    bot.sendMessage(msg.chat.id , `${dollarMessage}`,{reply_to_message_id: msg.message_id})
   }else if(msg.text == 'یورو(EUR)'){
-    bot.sendMessage(msg.chat.id , `${eurMessage}`)
+    bot.sendMessage(msg.chat.id , `${eurMessage}`,{reply_to_message_id: msg.message_id})
   }else if(msg.text == 'پوند(GBP)'){
-    bot.sendMessage(msg.chat.id , `${gbpMessage}`)  
+    bot.sendMessage(msg.chat.id , `${gbpMessage}`,{reply_to_message_id: msg.message_id})  
   }else if(msg.text == `${pr_text}`){
-    bot.sendMessage(msg.chat.id , `از منوی زیر یکی رو انتخاب کن` ,{
+    bot.sendMessage(msg.chat.id , `از منوی زیر یکی رو انتخاب کن`,{
       reply_markup : {
         'resize_keyboard' : true,
         'keyboard' : [
@@ -264,8 +264,8 @@ bot.on('message' , msg => {
       }
     })
   }else if(msg.text == '🌕 سکه'){
-    bot.sendMessage(msg.chat.id , `${coinMessage}`)
+    bot.sendMessage(msg.chat.id , `${coinMessage}`,{reply_to_message_id: msg.message_id})
   }else if(msg.text == '🛢️ نفت'){
-    bot.sendMessage(msg.chat.id , `${oliMessage}`)
+    bot.sendMessage(msg.chat.id , `${oliMessage}`,{reply_to_message_id: msg.message_id})
   }
 })
