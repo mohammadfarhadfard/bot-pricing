@@ -1,5 +1,5 @@
 # This is my bot for providing cryptocurrency prices
-### and also **sjd_bot** is a bot that is getting updated every day with the prices of currencies, gold, etc in IRR (*Iranian Rial*).
+### and also this bot is a bot that is getting updated every day with the prices of currencies, gold, etc in IRR (Iranian Rial).
 
 
 
