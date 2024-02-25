@@ -97,7 +97,7 @@ allKey.forEach((key) => {
     .catch(error => {
       console.log("err :" + error);
     })
-  }, 12*1000);
+  }, 300*1000);
 })
 
 
@@ -139,7 +139,7 @@ coinKey.forEach((key) => {
     .catch(error => {
       console.log("err :" + error);
     })
-  }, 6*1000);
+  }, 300*1000);
 })
 
 
@@ -165,7 +165,7 @@ oilKey.forEach((key) => {
     .catch(error => {
       console.log("err :" + error);
     })
-  }, 6*1000);
+  }, 300*1000);
 })
 
 
@@ -224,7 +224,7 @@ setInterval(function makeMsg(){
     // console.log(`${key} : ${value}`);
   })
   message += ` \n \n 🗓 ${date}`
-},2 * 1000)
+},2*1000)
 
 
 
