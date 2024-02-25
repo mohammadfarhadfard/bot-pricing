@@ -197,7 +197,7 @@ setInterval(() => {
 
 
 
-//dollar,eur,gbp message
+//usd,eur,gbp message
 setInterval(() => {
   dollarMessage = `| USD-IRR |\n🔸 قیمت ها به ریال است \n \n \n نرخ فعلی : ${global.dollar} \n \n بالاترین قیمت روز : ${global.dollar_max}
     \n پایین ترین قیمت روز : ${global.dollar_min} \n \n بیشترین مقدار نوسان روز : ${global.dollar_swing}
@@ -236,7 +236,7 @@ bot.on('message' , msg => {
   }else if(msg.text == '💰 قیمت ارز های دیجیتال'){
     bot.sendMessage(msg.chat.id , `${message}`,{reply_to_message_id: msg.message_id})
   }else if(msg.text == '💵 دلار | یورو | پوند'){
-    bot.sendMessage(msg.chat.id , `انتخاب کنید`,{
+    bot.sendMessage(msg.chat.id , `انتخاب کن`,{
       reply_markup : {
         'resize_keyboard' : true,
         'keyboard' : [
