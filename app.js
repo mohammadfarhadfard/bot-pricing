@@ -4,8 +4,6 @@ require('dotenv').config()
 let TOKEN = process.env.BOT_TOKEN
 const bot = new TelegramBot(TOKEN , {polling : true})
 
-
-
 //main menu
 bot.onText(/\/start/ ,msg => {
   bot.sendMessage(msg.chat.id , `سلام ${msg.from.first_name}  چه کاری برات انجام بدم؟` ,{reply_to_message_id: msg.message_id},{
@@ -20,13 +18,9 @@ bot.onText(/\/start/ ,msg => {
   })
 })
 
-
-
 //getting date
 const moment = require('jalali-moment');
 let date = moment().locale('fa').format('YYYY/M/D hh:mm');
-
-
 
 //crypto pricing
 const coins = ["BTC","ETH","XRP","AVAX","TRX","SOL","BNB","ADA","SHIB","TON","USDC","DOGE"]
@@ -44,8 +38,6 @@ coins.forEach((coin)=>{
   },2 * 1000)
 })
 
-
-
 //get tether price
 setInterval(() =>{
   let nobitex='https://api.nobitex.ir/v2/orderbook/USDTIRT'
@@ -58,8 +50,6 @@ setInterval(() =>{
     console.log("err: " +error)
     })
 } , 2 * 1000)
-
-
 
 //get dollar,eur,gbp prices
 const fetchCurrencyPrice = (key) => {
@@ -90,51 +80,6 @@ allKey.forEach((key) => {
   setInterval(() => fetchCurrencyPrice(key), 3 * 1000);
 });
 
-
-
-
-//gettin coin prices
-let coinKey = ['retail_sekee','retail_sekeb','retail_nim','retail_rob','retail_gerami']
-coinKey.forEach((key) => {
-  setInterval(() => {
-    let coinPrice = `https://raw.githubusercontent.com/margani/pricedb/main/tgju/current/${key}/latest.json`
-    axios.get(coinPrice)
-    .then(function(response){
-      if(coinPrice == `https://raw.githubusercontent.com/margani/pricedb/main/tgju/current/retail_sekee/latest.json`){
-        global.sekeEm = response.data.p
-        global.sekeEm_max = response.data.h
-        global.sekeEm_min = response.data.l
-        global.sekeEm_s= response.data.t
-      }else if (coinPrice == `https://raw.githubusercontent.com/margani/pricedb/main/tgju/current/retail_sekeb/latest.json`){
-        global.sekeB = response.data.p
-        global.sekeB_max = response.data.h
-        global.sekeB_min = response.data.l
-        global.sekeB_s= response.data.t
-      }else if(coinPrice == `https://raw.githubusercontent.com/margani/pricedb/main/tgju/current/retail_nim/latest.json`){
-        global.sekeNim = response.data.p
-        global.sekeNim_max = response.data.h
-        global.sekeNim_min = response.data.l
-        global.sekeNim_s= response.data.t
-      }else if(coinPrice == `https://raw.githubusercontent.com/margani/pricedb/main/tgju/current/retail_rob/latest.json`){
-        global.sekeRob = response.data.p
-        global.sekeRob_max = response.data.h
-        global.sekeRob_min = response.data.l
-        global.sekeRob_s= response.data.t
-      }else{
-        global.sekeGer = response.data.p
-        global.sekeGer_max = response.data.h
-        global.sekeGer_min = response.data.l
-        global.sekeGer_s= response.data.t
-      }
-    })
-    .catch(error => {
-      console.log("err :" + error);
-    })
-  }, 3*1000);
-})
-
-
-
 //gitting oil prices
 let oilKey = ['oil_opec','oil_brent','oil']
 oilKey.forEach((key) => {
@@ -159,6 +104,62 @@ oilKey.forEach((key) => {
   }, 3*1000);
 })
 
+// getting coin prices
+const fetchCoinPrices = (keys) => {
+  keys.forEach((key) => {
+    setInterval(() => {
+      axios.get(`https://raw.githubusercontent.com/margani/pricedb/main/tgju/current/retail_${key}/latest.json`)
+        .then(response => {
+          const { p, h, l, t } = response.data;
+          global[`seke${key.charAt(0).toUpperCase() + key.slice(1)}`] = p;
+          global[`seke${key.charAt(0).toUpperCase() + key.slice(1)}_max`] = h;
+          global[`seke${key.charAt(0).toUpperCase() + key.slice(1)}_min`] = l;
+          global[`seke${key.charAt(0).toUpperCase() + key.slice(1)}_s`] = t;
+        })
+        .catch(error => console.log("err :" + error));
+    }, 3 * 1000);
+  });
+};
+
+let coinKeys = ['sekee', 'sekeb', 'nim', 'rob', 'gerami'];
+fetchCoinPrices(coinKeys); // Fetch prices for all coin types
+
+
+// coin message
+const generateCoinMessage = () => {
+  const coinTypes = {
+    sekee: 'امامی',
+    sekeb: 'بهار آزادی',
+    nim: 'نیم سکه',
+    rob: 'ربع سکه',
+    gerami: 'گرمی'
+  };
+
+  let message = `قیمت سکه : \n\n\n🔸 قیمت ها به ریال است \n\n\n`;
+  const hr = `ــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ`;
+
+  Object.keys(coinTypes).forEach((type, index) => {
+    message += `🌕 ${coinTypes[type]} : \n\n` +
+               `💵 قیمت کنونی : ${global[`seke${type.charAt(0).toUpperCase() + type.slice(1)}`]}\n` +
+               `📉 بیشترین قیمت : ${global[`seke${type.charAt(0).toUpperCase() + type.slice(1)}_max`]}\n` +
+               `📈 کمترین قیمت : ${global[`seke${type.charAt(0).toUpperCase() + type.slice(1)}_min`]}\n\n` +
+               `⏰ زمان ثبت آخرین نرخ : ${global[`seke${type.charAt(0).toUpperCase() + type.slice(1)}_s`]}\n\n`;
+    
+    // Add horizontal rule after each coin except the last one
+    if (index < Object.keys(coinTypes).length - 1) {
+      message += `${hr}\n\n`;
+    }
+  });
+
+  message += `\n🗓 ${date}`;
+  return message;
+};
+
+// Set interval for coin message
+setInterval(() => {
+  coinMessage = generateCoinMessage();
+}, 2 * 1000);
+
 
 
 //oli message
@@ -171,29 +172,17 @@ setInterval(() => {
 
 
 
-//coin message
-hr = `ــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ`
-setInterval(() => {
-  coinMessage =`قیمت سکه : \n\n\n🔸 قیمت ها به ریال است \n\n\n🌕 سکه امامی : \n\n💵 قیمت کنونی : ${global.sekeEm}\n📉 بیشترین قیمت : ${global.sekeEm_max}\n📈 کمترین قیمت : ${global.sekeEm_min}\n\n\n⏰ زمان ثبت آخرین نرخ : ${global.sekeEm_s}\n\n${hr}\n
-🌕 سکه بهار آزادی : \n\n💵 قیمت کنونی : ${global.sekeB}\n📉 بیشترین قیمت : ${global.sekeB_max}\n📈 کمترین قیمت : ${global.sekeB_min}\n\n\n⏰ زمان ثبت آخرین نرخ : ${global.sekeB_s}\n\n${hr}\n
-🌕 نیم سکه بهار آزادی : \n\n💵 قیمت کنونی : ${global.sekeNim}\n📉 بیشترین قیمت : ${global.sekeNim_max}\n📈 کمترین قیمت : ${global.sekeNim_min}\n\n\n⏰ زمان ثبت آخرین نرخ : ${global.sekeNim_s}\n\n${hr}\n
-🌕 ربع سکه بهار آزادی : \n\n💵 قیمت کنونی : ${global.sekeRob}\n📉 بیشترین قیمت : ${global.sekeRob_max}\n📈 کمترین قیمت : ${global.sekeRob_min}\n\n\n⏰ زمان ثبت آخرین نرخ : ${global.sekeRob_s}\n\n${hr}\n
-🌕 سکه گرمی  : \n\n💵 قیمت کنونی : ${global.sekeGer}\n📉 بیشترین قیمت : ${global.sekeGer_max}\n📈 کمترین قیمت : ${global.sekeGer_min}\n\n\n⏰ زمان ثبت آخرین نرخ : ${global.sekeGer_s}\n\n\n🗓 ${date}`
-}, 2*1000);
-
-
-
 //usd,eur,gbp message
 setInterval(() => {
-  dollarMessage = `| USD-IRR |\n🔸 قیمت ها به ریال است \n \n \n نرخ فعلی : ${global.dollar} \n \n بالاترین قیمت روز : ${global.dollar_max}
+  dollarMessage = `| USD-IRR |\n\n🔸 قیمت ها به ریال است \n \n \n نرخ فعلی : ${global.dollar} \n \n بالاترین قیمت روز : ${global.dollar_max}
     \n پایین ترین قیمت روز : ${global.dollar_min} \n \n بیشترین مقدار نوسان روز : ${global.dollar_swing}
     \n درصد بیشترین نوسان روز : ${global.dollar_Percent} \n \n زمان ثبت آخرین نرخ : ${global.dollar_s} \n \n \n 🗓 ${date}`
 
-    eurMessage = `| EUR-IRR |\n🔸 قیمت ها به ریال است \n \n \n نرخ فعلی : ${global.eur} \n \n بالاترین قیمت روز : ${global.eur_max}
+    eurMessage = `| EUR-IRR |\n\n🔸 قیمت ها به ریال است \n \n \n نرخ فعلی : ${global.eur} \n \n بالاترین قیمت روز : ${global.eur_max}
     \n پایین ترین قیمت روز : ${global.eur_min} \n \n بیشترین مقدار نوسان روز : ${global.eur_swing}
     \n درصد بیشترین نوسان روز : ${global.eur_Percent} \n \n زمان ثبت آخرین نرخ : ${global.eur_s} \n \n \n 🗓 ${date}`
 
-    gbpMessage = `| GBP-IRR |\n🔸 قیمت ها به ریال است \n \n \n نرخ فعلی : ${global.gbp} \n \n بالاترین قیمت روز : ${global.gbp_max}
+    gbpMessage = `| GBP-IRR |\n\n🔸 قیمت ها به ریال است \n \n \n نرخ فعلی : ${global.gbp} \n \n بالاترین قیمت روز : ${global.gbp_max}
     \n پایین ترین قیمت روز : ${global.gbp_min} \n \n بیشترین مقدار نوسان روز : ${global.gbp_swing}
     \n درصد بیشترین نوسان روز : ${global.gbp_Percent} \n \n زمان ثبت آخرین نرخ : ${global.gbp_s} \n \n \n 🗓 ${date}`
 
@@ -224,7 +213,7 @@ setInterval(function makeMsg(){
 let pr_text = 'بازگشت به منوی اصلی'
 bot.on('message' , msg => {
   if(msg.text == 'USDT/IRR | قیمت تتر'){
-    bot.sendMessage(msg.chat.id , `قیمت لحظه ای : ${USDT_price} ریال\n  \n 🗓 ${date}`,{reply_to_message_id: msg.message_id})
+    bot.sendMessage(msg.chat.id , `قیمت لحظه ای : ${USDT_price} ریال\n\n 🗓 ${date}`,{reply_to_message_id: msg.message_id})
   }else if(msg.text == '💰 قیمت ارز های دیجیتال'){
     bot.sendMessage(msg.chat.id , `${message}`,{reply_to_message_id: msg.message_id})
   }else if(msg.text == '💵 دلار | یورو | پوند'){
