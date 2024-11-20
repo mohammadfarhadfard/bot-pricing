@@ -61,44 +61,35 @@ setInterval(() =>{
 
 
 
-//getting dollar,eur,gbp prices
-let allKey = ['price_dollar_rl','price_gbp','price_eur']
-allKey.forEach((key) => {
-  setInterval(() => {
-    let dprice = `https://raw.githubusercontent.com/margani/pricedb/main/tgju/current/${key}/latest.json`
-    axios.get(dprice)
-    .then(function(response){
-      if(dprice == `https://raw.githubusercontent.com/margani/pricedb/main/tgju/current/price_dollar_rl/latest.json`){
-        global.dollar = response.data.p
-        global.dollar_max = response.data.h
-        global.dollar_min = response.data.l
-        global.dollar_swing = response.data.d
-        global.dollar_Percent = response.data.dp
-        global.dollar_dt = response.data.dt
-        global.dollar_s= response.data.t
-      }else if (dprice == `https://raw.githubusercontent.com/margani/pricedb/main/tgju/current/price_gbp/latest.json`){
-        global.gbp = response.data.p
-        global.gbp_max = response.data.h
-        global.gbp_min = response.data.l
-        global.gbp_swing = response.data.d
-        global.gbp_Percent = response.data.dp
-        global.gbp_dt = response.data.dt
-        global.gbp_s= response.data.t
-      }else{
-        global.eur = response.data.p
-        global.eur_max = response.data.h
-        global.eur_min = response.data.l
-        global.eur_swing = response.data.d
-        global.eur_Percent = response.data.dp
-        global.eur_dt = response.data.dt
-        global.eur_s= response.data.t
+//get dollar,eur,gbp prices
+const fetchCurrencyPrice = (key) => {
+  let dprice = `https://raw.githubusercontent.com/margani/pricedb/main/tgju/current/${key}/latest.json`;
+  axios.get(dprice)
+    .then(function(response) {
+      const priceData = response.data;
+      const mappings = {
+        'price_dollar_rl': ['dollar', 'dollar_max', 'dollar_min', 'dollar_swing', 'dollar_Percent', 'dollar_dt', 'dollar_s'],
+        'price_gbp': ['gbp', 'gbp_max', 'gbp_min', 'gbp_swing', 'gbp_Percent', 'gbp_dt', 'gbp_s'],
+        'price_eur': ['eur', 'eur_max', 'eur_min', 'eur_swing', 'eur_Percent', 'eur_dt', 'eur_s']
+      };
+
+      const keys = mappings[key];
+      if (keys) {
+        keys.forEach((globalKey, index) => {
+          global[globalKey] = priceData[index === 0 ? 'p' : index === 1 ? 'h' : index === 2 ? 'l' : index === 3 ? 'd' : index === 4 ? 'dp' : index === 5 ? 'dt' : 't'];
+        });
       }
     })
     .catch(error => {
       console.log("err :" + error);
-    })
-  }, 3*1000);
-})
+    });
+};
+
+let allKey = ['price_dollar_rl', 'price_gbp', 'price_eur'];
+allKey.forEach((key) => {
+  setInterval(() => fetchCurrencyPrice(key), 3 * 1000);
+});
+
 
 
 
