@@ -157,20 +157,29 @@ setInterval(() => {
                `▪️ نفت(WTI) : ${global.oil} دلار\n\n ⏰ زمان ثبت آخرین نرخ : ${global.oil_t}\n\n\n 🗓 ${date}`;
 }, 2 * 1000);
 
-// usd,eur,gbp message
+// USD, EUR, GBP message
+const createCurrencyMessage = (currency, data) => 
+  `| ${currency}-IRR |\n\n🔸 قیمت ها به ریال است\n\n\n` +
+  `نرخ فعلی : ${data.current} \n\n` +
+  `بالاترین : ${data.max}\n\n` +
+  `پایین ترین : ${data.min}\n\n` +
+  `نوسان : ${data.swing} (${data.percent}%)\n\n` +
+  `زمان ثبت آخرین نرخ : ${data.time}\n\n\n🗓 ${date}`;
+
 setInterval(() => {
-  dollarMessage = `| USD-IRR |\n\n🔸 قیمت ها به ریال است \n \n \n نرخ فعلی : ${global.dollar} \n \n بالاترین قیمت روز : ${global.dollar_max}
-    \n پایین ترین قیمت روز : ${global.dollar_min} \n \n بیشترین مقدار نوسان روز : ${global.dollar_swing}
-    \n درصد بیشترین نوسان روز : ${global.dollar_Percent} \n \n زمان ثبت آخرین نرخ : ${global.dollar_s} \n \n \n 🗓 ${date}`
-
-    eurMessage = `| EUR-IRR |\n\n🔸 قیمت ها به ریال است \n \n \n نرخ فعلی : ${global.eur} \n \n بالاترین قیمت روز : ${global.eur_max}
-    \n پایین ترین قیمت روز : ${global.eur_min} \n \n بیشترین مقدار نوسان روز : ${global.eur_swing}
-    \n درصد بیشترین نوسان روز : ${global.eur_Percent} \n \n زمان ثبت آخرین نرخ : ${global.eur_s} \n \n \n 🗓 ${date}`
-
-    gbpMessage = `| GBP-IRR |\n\n🔸 قیمت ها به ریال است \n \n \n نرخ فعلی : ${global.gbp} \n \n بالاترین قیمت روز : ${global.gbp_max}
-    \n پایین ترین قیمت روز : ${global.gbp_min} \n \n بیشترین مقدار نوسان روز : ${global.gbp_swing}
-    \n درصد بیشترین نوسان روز : ${global.gbp_Percent} \n \n زمان ثبت آخرین نرخ : ${global.gbp_s} \n \n \n 🗓 ${date}`
-}, 2*1000);
+  const currencies = ['dollar', 'eur', 'gbp'];
+  currencies.forEach(currency => {
+    const data = {
+      current: global[currency],
+      max: global[`${currency}_max`],
+      min: global[`${currency}_min`],
+      swing: global[`${currency}_swing`],
+      percent: global[`${currency}_Percent`],
+      time: global[`${currency}_s`]
+    };
+    global[`${currency}Message`] = createCurrencyMessage(currency.toUpperCase(), data);
+  });
+}, 2 * 1000);
 
 // crypto message
 const orderedCoins = ["BTC", "ETH", "BNB", "XRP", "AVAX", "TRX", "SOL", "ADA", "SHIB", "TON", "USDC", "DOGE"];
