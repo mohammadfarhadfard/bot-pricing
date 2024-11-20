@@ -18,11 +18,11 @@ bot.onText(/\/start/ ,msg => {
   })
 })
 
-//getting date
+//get date
 const moment = require('jalali-moment');
 let date = moment().locale('fa').format('YYYY/M/D hh:mm');
 
-//crypto pricing
+//get crypto prices
 const coins = ["BTC","ETH","XRP","AVAX","TRX","SOL","BNB","ADA","SHIB","TON","USDC","DOGE"]
 const prices = []
 coins.forEach((coin)=>{
@@ -62,7 +62,6 @@ const fetchCurrencyPrice = (key) => {
         'price_gbp': ['gbp', 'gbp_max', 'gbp_min', 'gbp_swing', 'gbp_Percent', 'gbp_dt', 'gbp_s'],
         'price_eur': ['eur', 'eur_max', 'eur_min', 'eur_swing', 'eur_Percent', 'eur_dt', 'eur_s']
       };
-
       const keys = mappings[key];
       if (keys) {
         keys.forEach((globalKey, index) => {
@@ -80,31 +79,21 @@ allKey.forEach((key) => {
   setInterval(() => fetchCurrencyPrice(key), 3 * 1000);
 });
 
-//gitting oil prices
-let oilKey = ['oil_opec','oil_brent','oil']
-oilKey.forEach((key) => {
+// get oil prices
+const oilKeys = ['oil_opec', 'oil_brent', 'oil'];
+oilKeys.forEach((key) => {
   setInterval(() => {
-    let oilPrice = `https://raw.githubusercontent.com/margani/pricedb/main/tgju/current/${key}/latest.json`
-    axios.get(oilPrice)
-    .then(function(response){
-      if(oilPrice == `https://raw.githubusercontent.com/margani/pricedb/main/tgju/current/oil_opec/latest.json`){
-        global.oil_opec = response.data.p
-        global.oil_opec_t = response.data.t
-      }else if(oilPrice == `https://raw.githubusercontent.com/margani/pricedb/main/tgju/current/oil_brent/latest.json`){
-        global.oil_brent = response.data.p
-        global.oil_brent_t = response.data.t
-      }else{
-        global.oil_WTI = response.data.p
-        global.oil_WTI_t = response.data.t
-      }
-    })
-    .catch(error => {
-      console.log("err :" + error);
-    })
-  }, 3*1000);
-})
+    const oilPriceUrl = `https://raw.githubusercontent.com/margani/pricedb/main/tgju/current/${key}/latest.json`;
+    axios.get(oilPriceUrl)
+      .then(response => {
+        global[key] = response.data.p;
+        global[`${key}_t`] = response.data.t;
+      })
+      .catch(error => console.log("err :" + error));
+  }, 3 * 1000);
+});
 
-// getting coin prices
+// get coin prices
 const fetchCoinPrices = (keys) => {
   keys.forEach((key) => {
     setInterval(() => {
@@ -124,7 +113,6 @@ const fetchCoinPrices = (keys) => {
 let coinKeys = ['sekee', 'sekeb', 'nim', 'rob', 'gerami'];
 fetchCoinPrices(coinKeys); // Fetch prices for all coin types
 
-
 // coin message
 const generateCoinMessage = () => {
   const coinTypes = {
@@ -137,7 +125,6 @@ const generateCoinMessage = () => {
 
   let message = `قیمت سکه : \n\n\n🔸 قیمت ها به ریال است \n\n\n`;
   const hr = `ــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ`;
-
   Object.keys(coinTypes).forEach((type, index) => {
     message += `🌕 ${coinTypes[type]} : \n\n` +
                `💵 قیمت کنونی : ${global[`seke${type.charAt(0).toUpperCase() + type.slice(1)}`]}\n` +
@@ -150,29 +137,27 @@ const generateCoinMessage = () => {
       message += `${hr}\n\n`;
     }
   });
-
   message += `\n🗓 ${date}`;
   return message;
 };
 
-// Set interval for coin message
+// set interval for coin message
 setInterval(() => {
   coinMessage = generateCoinMessage();
 }, 2 * 1000);
 
-
-
-//oli message
-hr = `ــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ`
+// oli message
+const hr = 'ــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ';
 setInterval(() => {
-  oliMessage = `🔸 قیمت ها به دلار است\n \n \n ▪️ نفت(opec) : ${global.oil_opec} دلار \n \n ⏰ زمان ثبت آخرین نرخ : ${global.oil_opec_t} \n \n${hr} \n
-▪️ نفت(brent) : ${global.oil_brent} دلار \n \n ⏰ زمان ثبت آخرین نرخ : ${global.oil_brent_t} \n \n${hr} \n
-▪️ نفت(WTI) : ${global.oil_WTI} دلار \n \n ⏰ زمان ثبت آخرین نرخ : ${global.oil_WTI_t} \n \n \n 🗓 ${date}`
-}, 2*1000);
+  oliMessage = `🔸 قیمت ها به دلار است\n\n\n` +
+               `▪️ نفت(opec) : ${global.oil_opec} دلار\n\n ⏰  زمان ثبت آخرین نرخ : ${global.oil_opec_t}\n\n` +
+               `${hr}\n\n` +
+               `▪️ نفت(brent) : ${global.oil_brent} دلار\n\n ⏰ زمان ثبت آخرین نرخ : ${global.oil_brent_t}\n\n` +
+               `${hr}\n\n` +
+               `▪️ نفت(WTI) : ${global.oil} دلار\n\n ⏰ زمان ثبت آخرین نرخ : ${global.oil_t}\n\n\n 🗓 ${date}`;
+}, 2 * 1000);
 
-
-
-//usd,eur,gbp message
+// usd,eur,gbp message
 setInterval(() => {
   dollarMessage = `| USD-IRR |\n\n🔸 قیمت ها به ریال است \n \n \n نرخ فعلی : ${global.dollar} \n \n بالاترین قیمت روز : ${global.dollar_max}
     \n پایین ترین قیمت روز : ${global.dollar_min} \n \n بیشترین مقدار نوسان روز : ${global.dollar_swing}
@@ -185,12 +170,9 @@ setInterval(() => {
     gbpMessage = `| GBP-IRR |\n\n🔸 قیمت ها به ریال است \n \n \n نرخ فعلی : ${global.gbp} \n \n بالاترین قیمت روز : ${global.gbp_max}
     \n پایین ترین قیمت روز : ${global.gbp_min} \n \n بیشترین مقدار نوسان روز : ${global.gbp_swing}
     \n درصد بیشترین نوسان روز : ${global.gbp_Percent} \n \n زمان ثبت آخرین نرخ : ${global.gbp_s} \n \n \n 🗓 ${date}`
-
 }, 2*1000);
 
-
-
-//crypto message
+// crypto message
 const orderedCoins = ["BTC", "ETH", "BNB", "XRP", "AVAX", "TRX", "SOL", "ADA", "SHIB", "TON", "USDC", "DOGE"];
 setInterval(function makeMsg(){
   message = `قیمت ارز های دیجیتال : \n \n \n`;
@@ -208,8 +190,7 @@ setInterval(function makeMsg(){
   message += ` \n \n 🗓 ${date}`;
 }, 2*1000);
 
-
-//response and menu and tether message
+// response and menu and tether message
 let pr_text = 'بازگشت به منوی اصلی'
 bot.on('message' , msg => {
   if(msg.text == 'USDT/IRR | قیمت تتر'){
