@@ -211,16 +211,22 @@ setInterval(() => {
 
 
 //crypto message
+const orderedCoins = ["BTC", "ETH", "BNB", "XRP", "AVAX", "TRX", "SOL", "ADA", "SHIB", "TON", "USDC", "DOGE"];
 setInterval(function makeMsg(){
-  message = `قیمت ارز های دیجیتال : \n \n \n`
+  message = `قیمت ارز های دیجیتال : \n \n \n`;
+  orderedCoins.forEach(coin => {
+    if (prices[coin]) { 
+      message += `▪ ${coin}-USDT : ${prices[coin]} \n \n`;
+    }
+  });
   Object.entries(prices).sort().forEach(entry => {
-     const [key,value] = entry;
-    message += `▪ ${key}-USDT : ${value} \n \n`
-    // console.log(`${key} : ${value}`);
-  })
-  message += ` \n \n 🗓 ${date}`
-},2*1000)
-
+    const [key, value] = entry;
+    if (!orderedCoins.includes(key)) { 
+      message += `▪ ${key}-USDT : ${value} \n \n`;
+    }
+  });
+  message += ` \n \n 🗓 ${date}`;
+}, 2*1000);
 
 
 //response and menu and tether message
