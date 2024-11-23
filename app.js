@@ -64,7 +64,8 @@ const fetchCurrencyPrice = (key) => {
       const keys = mappings[key];
       if (keys) {
         keys.forEach((globalKey, index) => {
-          global[globalKey] = priceData[index === 0 ? 'p' : index === 1 ? 'h' : index === 2 ? 'l' : index === 3 ? 'd' : index === 4 ? 'dp' : index === 5 ? 'dt' : 't'];
+          global[globalKey] = priceData[index === 0 ? 'p' : index === 1 ? 
+          'h' : index === 2 ? 'l' : index === 3 ? 'd' : index === 4 ? 'dp' : index === 5 ? 'dt' : 't'];
         });
       }
     })
