@@ -123,6 +123,15 @@ const generateCoinMessage = () => {
     gerami: 'گرمی'
   };
 
+  // Check if any prices are undefined
+  const pricesUnavailable = Object.keys(coinTypes).some(type => 
+    global[`seke${type.charAt(0).toUpperCase() + type.slice(1)}`] === undefined
+  );
+
+  if (pricesUnavailable) {
+    return `🚫 قیمت ها در حال حاضر در دسترس نیستند. لطفا بعدا دوباره تلاش کنید.`;
+  }
+
   let message = `قیمت سکه : \n\n\n🔸 قیمت ها به ریال است \n\n\n`;
   const hr = `ــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ`;
   Object.keys(coinTypes).forEach((type, index) => {
@@ -145,6 +154,12 @@ const generateCoinMessage = () => {
 setInterval(() => {
   coinMessage = generateCoinMessage();
 }, 2 * 1000);
+
+// set interval for coin message
+setInterval(() => {
+  coinMessage = generateCoinMessage();
+}, 2 * 1000);
+
 
 // oli message
 const hr = 'ــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ';
