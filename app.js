@@ -169,14 +169,20 @@ setInterval(() => {
 }, 2 * 1000);
 
 // USD, EUR, GBP message
-const createCurrencyMessage = (currency, data) => 
-  `| ${currency}-IRR |\n\n🔸 قیمت ها به ریال است\n\n\n` +
-  `نرخ فعلی : ${data.current} \n\n` +
-  `بالاترین : ${data.max}\n\n` +
-  `پایین ترین : ${data.min}\n\n` +
-  `نوسان : ${data.swing} (${data.percent}%)\n\n` +
-  `زمان ثبت آخرین نرخ : ${data.time}\n\n\n🗓 ${date}`;
-
+const createCurrencyMessage = (currency, data) => {
+  // Check if any price data is undefined
+  const pricesUnavailable = Object.values(data).some(value => value === undefined);
+  if (pricesUnavailable) {
+    return `🚫 قیمت ها در حال حاضر در دسترس نیستند. لطفا بعدا دوباره تلاش کنید.`;
+  }
+  
+  return `| ${currency}-IRR |\n\n🔸 قیمت ها به ریال است\n\n\n` +
+         `نرخ فعلی : ${data.current} \n\n` +
+         `بالاترین : ${data.max}\n\n` +
+         `پایین ترین : ${data.min}\n\n` +
+         `نوسان : ${data.swing} (${data.percent}%)\n\n` +
+         `زمان ثبت آخرین نرخ : ${data.time}\n\n\n🗓 ${date}`;
+};
 setInterval(() => {
   const currencies = ['dollar', 'eur', 'gbp'];
   currencies.forEach(currency => {
