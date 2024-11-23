@@ -150,20 +150,21 @@ setInterval(() => {
 
 // oli message
 const hr = 'ــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ';
+const oilTypes = [
+  { key: 'oil_opec', label: 'نفت(opec)' },
+  { key: 'oil_brent', label: 'نفت(brent)' },
+  { key: 'oil', label: 'نفت(WTI)' }
+];
 setInterval(() => {
-  // check if any oil price data is undefined
-  const oilPricesUnavailable = [global.oil_opec, global.oil_brent, global.oil].some(price => price === undefined);
-  
-  if (oilPricesUnavailable) {
-    oliMessage = `🚫 قیمت ها در حال حاضر در دسترس نیستند. لطفا بعدا دوباره تلاش کنید.`;
-  } else {
-    oliMessage = `🔸 قیمت ها به دلار است\n\n\n` +
-                 `▪️ نفت(opec) : ${global.oil_opec} دلار\n\n ⏰  زمان ثبت آخرین نرخ : ${global.oil_opec_t}\n\n` +
-                 `${hr}\n\n` +
-                 `▪️ نفت(brent) : ${global.oil_brent} دلار\n\n ⏰ زمان ثبت آخرین نرخ : ${global.oil_brent_t}\n\n` +
-                 `${hr}\n\n` +
-                 `▪️ نفت(WTI) : ${global.oil} دلار\n\n ⏰ زمان ثبت آخرین نرخ : ${global.oil_t}\n\n\n 🗓 ${date}`;
-  }
+  const prices = oilTypes.map(oil => global[oil.key]);
+  oliMessage = prices.includes(undefined) 
+    ? `🚫 قیمت ها در حال حاضر در دسترس نیستند. لطفا بعدا دوباره تلاش کنید.` 
+    : `🔸 قیمت ها به دلار است\n\n\n` + 
+      oilTypes.map((oil, index) => 
+        `▪️ ${oil.label} : ${prices[index]} دلار\n\n⏰ زمان ثبت آخرین نرخ : ${global[`${oil.key}_t`]}\n\n` +
+        (index < oilTypes.length - 1 ? `${hr}\n\n` : '') // Only add hr if it's not the last item
+      ).join('') + 
+      `\n🗓 ${date}`;
 }, 2 * 1000);
 
 // USD, EUR, GBP message
