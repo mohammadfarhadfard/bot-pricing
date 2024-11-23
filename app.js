@@ -122,16 +122,13 @@ const generateCoinMessage = () => {
     rob: 'ربع سکه',
     gerami: 'گرمی'
   };
-
   // Check if any prices are undefined
   const pricesUnavailable = Object.keys(coinTypes).some(type => 
     global[`seke${type.charAt(0).toUpperCase() + type.slice(1)}`] === undefined
   );
-
   if (pricesUnavailable) {
     return `🚫 قیمت ها در حال حاضر در دسترس نیستند. لطفا بعدا دوباره تلاش کنید.`;
   }
-
   let message = `قیمت سکه : \n\n\n🔸 قیمت ها به ریال است \n\n\n`;
   const hr = `ــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ`;
   Object.keys(coinTypes).forEach((type, index) => {
@@ -140,7 +137,6 @@ const generateCoinMessage = () => {
                `📉 بیشترین قیمت : ${global[`seke${type.charAt(0).toUpperCase() + type.slice(1)}_max`]}\n` +
                `📈 کمترین قیمت : ${global[`seke${type.charAt(0).toUpperCase() + type.slice(1)}_min`]}\n\n` +
                `⏰ زمان ثبت آخرین نرخ : ${global[`seke${type.charAt(0).toUpperCase() + type.slice(1)}_s`]}\n\n`;
-    
     // Add horizontal rule after each coin except the last one
     if (index < Object.keys(coinTypes).length - 1) {
       message += `${hr}\n\n`;
@@ -197,7 +193,7 @@ setInterval(() => {
 }, 2 * 1000);
 
 // crypto message
-const orderedCoins = ["BTC", "ETH", "BNB", "XRP", "AVAX", "TRX", "SOL", "ADA", "SHIB", "TON", "USDC", "DOGE"];
+const orderedCoins = ["BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "USDC", "ADA", "TRX", "AVAX", "SHIB", "TON"];
 setInterval(function makeMsg(){
   message = `قیمت ارز های دیجیتال : \n \n \n`;
   orderedCoins.forEach(coin => {
