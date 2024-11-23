@@ -44,7 +44,6 @@ setInterval(() =>{
     axios.get(nobitex)
     .then( function(response) {
       global.USDT_price = response.data.lastTradePrice
-      // console.log(global.USDT_price);
      })
     .catch(error => {
     console.log("err: " +error)
@@ -73,7 +72,6 @@ const fetchCurrencyPrice = (key) => {
       console.log("err :" + error);
     });
 };
-
 let allKey = ['price_dollar_rl', 'price_gbp', 'price_eur'];
 allKey.forEach((key) => {
   setInterval(() => fetchCurrencyPrice(key), 3 * 1000);
@@ -109,9 +107,8 @@ const fetchCoinPrices = (keys) => {
     }, 3 * 1000);
   });
 };
-
 let coinKeys = ['sekee', 'sekeb', 'nim', 'rob', 'gerami'];
-fetchCoinPrices(coinKeys); // Fetch prices for all coin types
+fetchCoinPrices(coinKeys);
 
 // coin message
 const generateCoinMessage = () => {
@@ -122,7 +119,7 @@ const generateCoinMessage = () => {
     rob: 'ربع سکه',
     gerami: 'گرمی'
   };
-  // Check if any prices are undefined
+  // check if any prices are undefined
   const pricesUnavailable = Object.keys(coinTypes).some(type => 
     global[`seke${type.charAt(0).toUpperCase() + type.slice(1)}`] === undefined
   );
@@ -137,7 +134,7 @@ const generateCoinMessage = () => {
                `📉 بیشترین قیمت : ${global[`seke${type.charAt(0).toUpperCase() + type.slice(1)}_max`]}\n` +
                `📈 کمترین قیمت : ${global[`seke${type.charAt(0).toUpperCase() + type.slice(1)}_min`]}\n\n` +
                `⏰ زمان ثبت آخرین نرخ : ${global[`seke${type.charAt(0).toUpperCase() + type.slice(1)}_s`]}\n\n`;
-    // Add horizontal rule after each coin except the last one
+    
     if (index < Object.keys(coinTypes).length - 1) {
       message += `${hr}\n\n`;
     }
@@ -145,27 +142,27 @@ const generateCoinMessage = () => {
   message += `\n🗓 ${date}`;
   return message;
 };
-
 // set interval for coin message
 setInterval(() => {
   coinMessage = generateCoinMessage();
 }, 2 * 1000);
-
-// set interval for coin message
-setInterval(() => {
-  coinMessage = generateCoinMessage();
-}, 2 * 1000);
-
 
 // oli message
 const hr = 'ــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ';
 setInterval(() => {
-  oliMessage = `🔸 قیمت ها به دلار است\n\n\n` +
-               `▪️ نفت(opec) : ${global.oil_opec} دلار\n\n ⏰  زمان ثبت آخرین نرخ : ${global.oil_opec_t}\n\n` +
-               `${hr}\n\n` +
-               `▪️ نفت(brent) : ${global.oil_brent} دلار\n\n ⏰ زمان ثبت آخرین نرخ : ${global.oil_brent_t}\n\n` +
-               `${hr}\n\n` +
-               `▪️ نفت(WTI) : ${global.oil} دلار\n\n ⏰ زمان ثبت آخرین نرخ : ${global.oil_t}\n\n\n 🗓 ${date}`;
+  // check if any oil price data is undefined
+  const oilPricesUnavailable = [global.oil_opec, global.oil_brent, global.oil].some(price => price === undefined);
+  
+  if (oilPricesUnavailable) {
+    oliMessage = `🚫 قیمت ها در حال حاضر در دسترس نیستند. لطفا بعدا دوباره تلاش کنید.`;
+  } else {
+    oliMessage = `🔸 قیمت ها به دلار است\n\n\n` +
+                 `▪️ نفت(opec) : ${global.oil_opec} دلار\n\n ⏰  زمان ثبت آخرین نرخ : ${global.oil_opec_t}\n\n` +
+                 `${hr}\n\n` +
+                 `▪️ نفت(brent) : ${global.oil_brent} دلار\n\n ⏰ زمان ثبت آخرین نرخ : ${global.oil_brent_t}\n\n` +
+                 `${hr}\n\n` +
+                 `▪️ نفت(WTI) : ${global.oil} دلار\n\n ⏰ زمان ثبت آخرین نرخ : ${global.oil_t}\n\n\n 🗓 ${date}`;
+  }
 }, 2 * 1000);
 
 // USD, EUR, GBP message
@@ -175,7 +172,6 @@ const createCurrencyMessage = (currency, data) => {
   if (pricesUnavailable) {
     return `🚫 قیمت ها در حال حاضر در دسترس نیستند. لطفا بعدا دوباره تلاش کنید.`;
   }
-  
   return `| ${currency}-IRR |\n\n🔸 قیمت ها به ریال است\n\n\n` +
          `نرخ فعلی : ${data.current} \n\n` +
          `بالاترین : ${data.max}\n\n` +
@@ -200,28 +196,37 @@ setInterval(() => {
 
 // crypto message
 const orderedCoins = ["BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "USDC", "ADA", "TRX", "AVAX", "SHIB", "TON"];
-setInterval(function makeMsg(){
+setInterval(function makeMsg() {
   message = `قیمت ارز های دیجیتال : \n \n \n`;
-  orderedCoins.forEach(coin => {
-    if (prices[coin]) { 
-      message += `▪ ${coin}-USDT : ${prices[coin]} \n \n`;
-    }
-  });
-  Object.entries(prices).sort().forEach(entry => {
-    const [key, value] = entry;
-    if (!orderedCoins.includes(key)) { 
-      message += `▪ ${key}-USDT : ${value} \n \n`;
-    }
-  });
-  message += ` \n \n 🗓 ${date}`;
-}, 2*1000);
+  // check if any prices are undefined
+  const pricesUnavailable = orderedCoins.some(coin => prices[coin] === undefined);
+  if (pricesUnavailable) {
+    message = `🚫 قیمت ها در حال حاضر در دسترس نیستند. لطفا بعدا دوباره تلاش کنید.`;
+  } else {
+    orderedCoins.forEach(coin => {
+      if (prices[coin]) { 
+        message += `▪ ${coin}-USDT : ${prices[coin]} \n \n`;
+      }
+    });
+    Object.entries(prices).sort().forEach(entry => {
+      const [key, value] = entry;
+      if (!orderedCoins.includes(key)) { 
+        message += `▪ ${key}-USDT : ${value} \n \n`;
+      }
+    });
+    message += ` \n \n 🗓 ${date}`;
+  }
+}, 2 * 1000);
 
 // response and menu and tether message
 let pr_text = 'بازگشت به منوی اصلی'
 bot.on('message' , msg => {
   if(msg.text == 'USDT/IRR | قیمت تتر'){
-    bot.sendMessage(msg.chat.id , `قیمت لحظه ای : ${USDT_price} ریال\n\n 🗓 ${date}`,{reply_to_message_id: msg.message_id})
-  }else if(msg.text == '💰 قیمت ارز های دیجیتال'){
+    if (global.USDT_price === undefined) {
+      bot.sendMessage(msg.chat.id, `🚫 قیمت تتر در حال حاضر در دسترس نیست. لطفا بعدا دوباره تلاش کنید.`, { reply_to_message_id: msg.message_id });
+    } else {
+      bot.sendMessage(msg.chat.id, `قیمت لحظه ای : ${global.USDT_price} ریال\n\n 🗓 ${date}`, { reply_to_message_id: msg.message_id });
+    }  }else if(msg.text == '💰 قیمت ارز های دیجیتال'){
     bot.sendMessage(msg.chat.id , `${message}`,{reply_to_message_id: msg.message_id})
   }else if(msg.text == '💵 دلار | یورو | پوند'){
     bot.sendMessage(msg.chat.id , `انتخاب کن`,{
