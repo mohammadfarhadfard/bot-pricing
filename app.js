@@ -224,9 +224,11 @@ let pr_text = 'بازگشت به منوی اصلی'
 bot.on('message' , msg => {
   if(msg.text == 'USDT/IRR | قیمت تتر'){
     if (global.USDT_price === undefined) {
-      bot.sendMessage(msg.chat.id, `🚫 قیمت تتر در حال حاضر در دسترس نیست. لطفا بعدا دوباره تلاش کنید.`, { reply_to_message_id: msg.message_id });
+      bot.sendMessage(msg.chat.id, `🚫 قیمت تتر در حال حاضر در دسترس نیست. لطفا بعدا دوباره تلاش کنید.`, 
+      { reply_to_message_id: msg.message_id });
     } else {
-      bot.sendMessage(msg.chat.id, `قیمت لحظه ای : ${global.USDT_price} ریال\n\n 🗓 ${date}`, { reply_to_message_id: msg.message_id });
+      bot.sendMessage(msg.chat.id, `قیمت لحظه ای : ${global.USDT_price} ریال\n\n 🗓 ${date}`, 
+      { reply_to_message_id: msg.message_id });
     }  }else if(msg.text == '💰 قیمت ارز های دیجیتال'){
     bot.sendMessage(msg.chat.id , `${message}`,{reply_to_message_id: msg.message_id})
   }else if(msg.text == '💵 دلار | یورو | پوند'){
