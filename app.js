@@ -162,7 +162,7 @@ setInterval(() => {
     : `🔸 قیمت ها به دلار است\n\n\n` + 
       oilTypes.map((oil, index) => 
         `▪️ ${oil.label} : ${prices[index]} دلار\n\n⏰ زمان ثبت آخرین نرخ : ${global[`${oil.key}_t`]}\n\n` +
-        (index < oilTypes.length - 1 ? `${hr}\n\n` : '') // Only add hr if it's not the last item
+        (index < oilTypes.length - 1 ? `${hr}\n\n` : '')
       ).join('') + 
       `\n🗓 ${date}`;
 }, 2 * 1000);
