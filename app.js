@@ -57,15 +57,15 @@ const fetchCurrencyPrice = (key) => {
     .then(function(response) {
       const priceData = response.data;
       const mappings = {
-        'price_dollar_rl': ['dollar', 'dollar_max', 'dollar_min', 'dollar_swing', 'dollar_Percent', 'dollar_dt', 'dollar_s'],
-        'price_gbp': ['gbp', 'gbp_max', 'gbp_min', 'gbp_swing', 'gbp_Percent', 'gbp_dt', 'gbp_s'],
-        'price_eur': ['eur', 'eur_max', 'eur_min', 'eur_swing', 'eur_Percent', 'eur_dt', 'eur_s']
+        'price_dollar_rl': ['dollar', 'dollar_max', 'dollar_min', 'dollar_ts'],
+        'price_gbp': ['gbp', 'gbp_max', 'gbp_min', 'gbp_ts'],
+        'price_eur': ['eur', 'eur_max', 'eur_min', 'eur_ts']
       };
       const keys = mappings[key];
       if (keys) {
         keys.forEach((globalKey, index) => {
           global[globalKey] = priceData[index === 0 ? 'p' : index === 1 ? 
-          'h' : index === 2 ? 'l' : index === 3 ? 'd' : index === 4 ? 'dp' : index === 5 ? 'dt' : 't'];
+          'h' : index === 2 ? 'l' : index === 3 ? 'ts' : index === 4 ? 'dp' : index === 5 ? 'dt' : 't'];
         });
       }
     })
@@ -86,7 +86,7 @@ oilKeys.forEach((key) => {
     axios.get(oilPriceUrl)
       .then(response => {
         global[key] = response.data.p;
-        global[`${key}_t`] = response.data.t;
+        global[`${key}_ts`] = response.data.ts;
       })
       .catch(error => console.log("err :" + error));
   }, 3 * 1000);
@@ -98,11 +98,11 @@ const fetchCoinPrices = (keys) => {
     setInterval(() => {
       axios.get(`https://raw.githubusercontent.com/margani/pricedb/main/tgju/current/retail_${key}/latest.json`)
         .then(response => {
-          const { p, h, l, t } = response.data;
+          const { p, h, l, ts } = response.data;
           global[`seke${key.charAt(0).toUpperCase() + key.slice(1)}`] = p;
           global[`seke${key.charAt(0).toUpperCase() + key.slice(1)}_max`] = h;
           global[`seke${key.charAt(0).toUpperCase() + key.slice(1)}_min`] = l;
-          global[`seke${key.charAt(0).toUpperCase() + key.slice(1)}_s`] = t;
+          global[`seke${key.charAt(0).toUpperCase() + key.slice(1)}_ts`] = ts;
         })
         .catch(error => console.log("err :" + error));
     }, 3 * 1000);
@@ -110,6 +110,12 @@ const fetchCoinPrices = (keys) => {
 };
 let coinKeys = ['sekee', 'sekeb', 'nim', 'rob', 'gerami'];
 fetchCoinPrices(coinKeys);
+
+
+//function to return the unavailable price message
+const getUnavailablePriceMessage = () => {
+  return `🚫 قیمت تتر در حال حاضر در دسترس نیست. لطفا بعدا دوباره تلاش کنید.`;
+};
 
 // coin message
 const generateCoinMessage = () => {
@@ -125,7 +131,7 @@ const generateCoinMessage = () => {
     global[`seke${type.charAt(0).toUpperCase() + type.slice(1)}`] === undefined
   );
   if (pricesUnavailable) {
-    return `🚫 قیمت ها در حال حاضر در دسترس نیستند. لطفا بعدا دوباره تلاش کنید.`;
+    return getUnavailablePriceMessage();
   }
   let message = `قیمت سکه : \n\n\n🔸 قیمت ها به ریال است \n\n\n`;
   const hr = `ــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ`;
@@ -134,7 +140,7 @@ const generateCoinMessage = () => {
                `💵 قیمت کنونی : ${global[`seke${type.charAt(0).toUpperCase() + type.slice(1)}`]}\n` +
                `📉 بیشترین قیمت : ${global[`seke${type.charAt(0).toUpperCase() + type.slice(1)}_max`]}\n` +
                `📈 کمترین قیمت : ${global[`seke${type.charAt(0).toUpperCase() + type.slice(1)}_min`]}\n\n` +
-               `⏰ زمان ثبت آخرین نرخ : ${global[`seke${type.charAt(0).toUpperCase() + type.slice(1)}_s`]}\n\n`;
+               `⏰ زمان ثبت آخرین نرخ : ${global[`seke${type.charAt(0).toUpperCase() + type.slice(1)}_ts`]}\n\n`;
     
     if (index < Object.keys(coinTypes).length - 1) {
       message += `${hr}\n\n`;
@@ -158,10 +164,10 @@ const oilTypes = [
 setInterval(() => {
   const prices = oilTypes.map(oil => global[oil.key]);
   oliMessage = prices.includes(undefined) 
-    ? `🚫 قیمت ها در حال حاضر در دسترس نیستند. لطفا بعدا دوباره تلاش کنید.` 
+    ? getUnavailablePriceMessage()
     : `🔸 قیمت ها به دلار است\n\n\n` + 
       oilTypes.map((oil, index) => 
-        `▪️ ${oil.label} : ${prices[index]} دلار\n\n⏰ زمان ثبت آخرین نرخ : ${global[`${oil.key}_t`]}\n\n` +
+        `▪️ ${oil.label} : ${prices[index]} دلار\n\n⏰ زمان ثبت آخرین نرخ : ${global[`${oil.key}_ts`]}\n\n` +
         (index < oilTypes.length - 1 ? `${hr}\n\n` : '')
       ).join('') + 
       `\n🗓 ${date}`;
@@ -172,13 +178,12 @@ const createCurrencyMessage = (currency, data) => {
   // Check if any price data is undefined
   const pricesUnavailable = Object.values(data).some(value => value === undefined);
   if (pricesUnavailable) {
-    return `🚫 قیمت ها در حال حاضر در دسترس نیستند. لطفا بعدا دوباره تلاش کنید.`;
+    return getUnavailablePriceMessage();
   }
   return `| ${currency}-IRR |\n\n🔸 قیمت ها به ریال است\n\n\n` +
          `نرخ فعلی : ${data.current} \n\n` +
          `بالاترین : ${data.max}\n\n` +
          `پایین ترین : ${data.min}\n\n` +
-         `نوسان : ${data.swing} (${data.percent}%)\n\n` +
          `زمان ثبت آخرین نرخ : ${data.time}\n\n\n🗓 ${date}`;
 };
 setInterval(() => {
@@ -188,9 +193,7 @@ setInterval(() => {
       current: global[currency],
       max: global[`${currency}_max`],
       min: global[`${currency}_min`],
-      swing: global[`${currency}_swing`],
-      percent: global[`${currency}_Percent`],
-      time: global[`${currency}_s`]
+      time: global[`${currency}_ts`]
     };
     global[`${currency}Message`] = createCurrencyMessage(currency.toUpperCase(), data);
   });
@@ -203,7 +206,7 @@ setInterval(function makeMsg() {
   // check if any prices are undefined
   const pricesUnavailable = orderedCoins.some(coin => prices[coin] === undefined);
   if (pricesUnavailable) {
-    message = `🚫 قیمت ها در حال حاضر در دسترس نیستند. لطفا بعدا دوباره تلاش کنید.`;
+    message = getUnavailablePriceMessage();
   } else {
     orderedCoins.forEach(coin => {
       if (prices[coin]) { 
@@ -224,13 +227,82 @@ setInterval(function makeMsg() {
 let pr_text = 'بازگشت به منوی اصلی'
 bot.on('message' , msg => {
   if(msg.text == 'USDT/IRR | قیمت تتر'){
-    if (global.USDT_price === undefined) {
-      bot.sendMessage(msg.chat.id, `🚫 قیمت تتر در حال حاضر در دسترس نیست. لطفا بعدا دوباره تلاش کنید.`, 
-      { reply_to_message_id: msg.message_id });
-    } else {
-      bot.sendMessage(msg.chat.id, `قیمت لحظه ای : ${global.USDT_price} ریال\n\n 🗓 ${date}`, 
-      { reply_to_message_id: msg.message_id });
-    }  }else if(msg.text == '💰 قیمت ارز های دیجیتال'){
+    bot.sendMessage(msg.chat.id ,`انتخاب کن`,{
+      reply_markup : {
+        'resize_keyboard' : true,
+        'keyboard' : [
+          [`قیمت کنونی`,'مقایسه بازار ها'],
+          [`${pr_text}`]
+        ]
+      }
+    })
+   }
+   else if(msg.text == `قیمت کنونی`){
+    if(global.USDT_price === undefined){
+      getUnavailablePriceMessage(),{reply_to_message_id: msg.message_id }
+    }else{
+      bot.sendMessage(msg.chat.id, `قیمت کنونی تتر : ${global.USDT_price} ریال\n\n 🗓 ${date}`,
+        { reply_to_message_id: msg.message_id });
+    }
+   }
+   else if(msg.text == 'مقایسه بازار ها'){
+    bot.sendMessage(msg.chat.id , `انتخاب کن`, {
+      reply_markup : {
+        'resize_keyboard' : true,
+        'keyboard' : [
+          ['فروش' , 'خرید'],
+          [`${pr_text}`]
+        ]
+      }
+    })
+   }
+   else if(msg.text == 'خرید'){
+    bot.sendMessage(msg.chat.id , 'مقدار مورد نظر خود را برای خرید وارد کنید.', {
+        reply_markup : {
+            'resize_keyboard' : true,
+            // 'force_reply' : true,
+        }
+    }).then(() => {
+        // Step 2: Listen for the User's Response
+        bot.once('message', (response) => {
+            const amount = parseFloat(response.text);
+            if (!isNaN(amount) && amount > 0) {
+                // Step 3: Process the Valid Input
+                bot.sendMessage(msg.chat.id, `لطفا منتظز بمانید.`, {
+                    reply_to_message_id: response.message_id
+                });
+                // Here you can add further logic to handle the purchase
+            } else {
+                bot.sendMessage(msg.chat.id, 'لطفا یک مقدار معتبر وارد کنید.', {
+                    reply_to_message_id: response.message_id
+                });
+            }
+        });
+      });
+    }
+   else if(msg.text == 'فروش'){
+    bot.sendMessage(msg.chat.id , `مقدار مورد نظر خود را برای فروش وارد کنید`, {
+      reply_markup : {
+          'resize_keyboard' : true,
+          // 'force_reply' : true,
+      }
+    }).then(() => {
+      bot.once('message', (response) => {
+          const amount = parseFloat(response.text);
+          if (!isNaN(amount) && amount > 0) {
+              bot.sendMessage(msg.chat.id, `لطفا منتظز بمانید.`, {
+                  reply_to_message_id: response.message_id
+              });
+              // Add further logic to handle the sale
+          } else {
+              bot.sendMessage(msg.chat.id, 'لطفا یک مقدار معتبر وارد کنید.', {
+                  reply_to_message_id: response.message_id
+              });
+          }
+      });
+    });
+   }
+   else if(msg.text == '💰 قیمت ارز های دیجیتال'){
     bot.sendMessage(msg.chat.id , `${message}`,{reply_to_message_id: msg.message_id})
   }else if(msg.text == '💵 دلار | یورو | پوند'){
     bot.sendMessage(msg.chat.id , `انتخاب کن`,{
