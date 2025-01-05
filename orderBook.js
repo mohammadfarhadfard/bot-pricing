@@ -116,6 +116,7 @@ async function tabdeal() {
   }
 }
 
+// Fetch data from exir
 async function exir() {
   try {
     const { data } = await axios.get(EXIR);

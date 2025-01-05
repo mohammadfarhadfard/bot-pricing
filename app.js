@@ -302,6 +302,24 @@ setInterval(function makeMsg() {
   }
 }, 2 * 1000);
 
+//convert persian num to en num
+function convertPersianToEnglish(input) {
+  const persianNumbers = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+  const englishNumbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+
+  let output = "";
+  for (let char of input) {
+    const index = persianNumbers.indexOf(char);
+    if (index !== -1) {
+      output += englishNumbers[index];
+    } else {
+      output += char;
+    }
+  }
+  return output;
+}
+
+
 // response and menu and tether message
 let amount = "";
 let action = "";
@@ -371,7 +389,8 @@ bot.on("message", (msg) => {
               },
             });
           } else {
-            amount = parseFloat(response.text);
+            const convertedAmount = convertPersianToEnglish(response.text);
+            amount = parseFloat(convertedAmount);
             if (!isNaN(amount) && amount > 0) {
               // Step 3: Process the Valid Input
               bot.sendMessage(msg.chat.id, `لطفا منتظز بمانید.`, {
@@ -391,24 +410,38 @@ bot.on("message", (msg) => {
     action = msg.text;
     console.log(action);
     bot
-      .sendMessage(msg.chat.id, `مقدار مورد نظر خود را برای فروش وارد کنید`, {
+      .sendMessage(msg.chat.id, "مقدار مورد نظر خود را برای فروش وارد کنید.", {
         reply_markup: {
           resize_keyboard: true,
-          // 'force_reply' : true,
+          keyboard: [["فروش", "خرید"], ["بازگشت"]],
         },
       })
       .then(() => {
+        // Step 2: Listen for the User's Response
         bot.once("message", (response) => {
-          amount = parseFloat(response.text);
-          if (!isNaN(amount) && amount > 0) {
-            bot.sendMessage(msg.chat.id, `لطفا منتظز بمانید.`, {
-              reply_to_message_id: response.message_id,
+          if (response.text === "بازگشت") {
+            // If the user enters "بازگشت"
+            bot.sendMessage(msg.chat.id, "انتخاب کن", {
+              reply_markup: {
+                resize_keyboard: true,
+                keyboard: [["قیمت کنونی", "مقایسه بازار ها"], [`${pr_text}`]],
+              },
             });
-            // Add further logic to handle the sale
           } else {
-            bot.sendMessage(msg.chat.id, "لطفا یک مقدار معتبر وارد کنید.", {
-              reply_to_message_id: response.message_id,
-            });
+            const convertedAmount = convertPersianToEnglish(response.text);
+            amount = parseFloat(convertedAmount);
+            if (!isNaN(amount) && amount > 0) {
+              // Step 3: Process the Valid Input
+              bot.sendMessage(msg.chat.id, `لطفا منتظز بمانید.`, {
+                reply_to_message_id: response.message_id,
+              });
+              // Here you can add further logic to handle the purchase
+              console.log(amount);
+            } else {
+              bot.sendMessage(msg.chat.id, "لطفا یک مقدار معتبر وارد کنید.", {
+                reply_to_message_id: response.message_id,
+              });
+            }
           }
         });
       });
