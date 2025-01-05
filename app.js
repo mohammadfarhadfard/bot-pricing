@@ -319,7 +319,6 @@ function convertPersianToEnglish(input) {
   return output;
 }
 
-
 // response and menu and tether message
 let amount = "";
 let action = "";
