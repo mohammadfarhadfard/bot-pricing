@@ -69,14 +69,20 @@ async function nobitex(){
 async function okex() {
   try {
     const { data } = await axios.get(OKEX);
-    const okex_buys = data.books.bids; 
-    const okex_sells = data.books.asks;     
+    const okex_buys = data.books.bids.map((order) => ({
+      price: parseFloat(order[0]), 
+      quantity: parseFloat(order[1]), 
+    }));
+    const okex_sells = data.books.asks.map((order) => ({
+      price: parseFloat(order[0]), 
+      quantity: parseFloat(order[1]), 
+    }));
     return {
       okex_buys,
       okex_sells,
     };
   } catch (error) {
-    console.error("Error fetching order book:", error);
+    console.error("Error fetching OKEx data:", error);
   }
 }
 
@@ -84,14 +90,20 @@ async function okex() {
 async function tetherLand() {
   try {
     const { data } = await axios.get(TETHERLAND);
-    const tetherLand_buys = data.data.markets.USDTTMN.bids; 
-    const tetherLand_sells = data.data.markets.USDTTMN.asks;     
+    const tetherLand_buys = data.data.markets.USDTTMN.bids.map((order) => ({
+      price: parseFloat(order.price), 
+      quantity: parseFloat(order.amount), 
+    }));
+    const tetherLand_sells = data.data.markets.USDTTMN.asks.map((order) => ({
+      price: parseFloat(order.price), 
+      quantity: parseFloat(order.amount), 
+    }));
     return {
       tetherLand_buys,
       tetherLand_sells,
     };
   } catch (error) {
-    console.error("Error fetching order book:", error);
+    console.error("Error fetching TetherLand data:", error);
   }
 }
 
@@ -99,14 +111,20 @@ async function tetherLand() {
 async function tabdeal() {
   try {
     const { data } = await axios.get(TABDEAL);
-    const tabdeal_buys = data.bids; 
-    const tabdeal_sells = data.asks;    
+    const tabdeal_buys = data.bids.map((order) => ({
+      price: parseFloat(order[0]), 
+      quantity: parseFloat(order[1]), 
+    }));
+    const tabdeal_sells = data.asks.map((order) => ({
+      price: parseFloat(order[0]), 
+      quantity: parseFloat(order[1]), 
+    }));
     return {
       tabdeal_buys,
       tabdeal_sells,
     };
   } catch (error) {
-    console.error("Error fetching order book:", error);
+    console.error("Error fetching Tabdeal data:", error);
   }
 }
 
@@ -114,14 +132,20 @@ async function tabdeal() {
 async function exir() {
   try {
     const { data } = await axios.get(EXIR);
-    const exir_buys = data["usdt-irt"].bids;
-    const exir_sells = data["usdt-irt"].asks;    
+    const exir_buys = data["usdt-irt"].bids.map((order) => ({
+      price: parseFloat(order[0]),
+      quantity: parseFloat(order[1]), 
+    }));
+    const exir_sells = data["usdt-irt"].asks.map((order) => ({
+      price: parseFloat(order[0]), 
+      quantity: parseFloat(order[1]), 
+    }));
     return {
       exir_buys,
       exir_sells,
     };
   } catch (error) {
-    console.error("Error fetching order book:", error);
+    console.error("Error fetching Exir data:", error);
   }
 }
 
