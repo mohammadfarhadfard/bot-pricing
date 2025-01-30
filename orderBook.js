@@ -1,15 +1,14 @@
 const axios = require("axios");
-const readline = require("readline");
 require("dotenv").config();
+let formatThousands = require("format-thousands");
 let WALLEX = process.env.WALLEX_Route;
 let NOBITEX = process.env.NOBITEX_Route;
 let RAMZINEX = process.env.RAMZINEX_Route;
 let TABDEAL = process.env.TABDEAL_Route;
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
+//get date
+const moment = require("jalali-moment");
+let date = moment().locale("fa").format("YYYY/M/D hh:mm");
 
 //data from wallex
 async function fetchData() {
@@ -69,8 +68,7 @@ async function ramzinex() {
     return { buys: [], sells: [] };
   }
 }
-
-//data from nobitex
+//data from nobitex and Averaging
 async function getOrderBook(action, amountRequested) {
   try {
     const response = await axios.get(NOBITEX);
@@ -80,8 +78,7 @@ async function getOrderBook(action, amountRequested) {
     let totalPriceNobitex = 0;
     let totalAmountNobitex = 0;
 
-    if (action.toLowerCase() === "buy") {
-      //buying from nobitex
+    if (action === "خرید") {
       for (let order of sell) {
         const price = parseFloat(order[0]);
         const availableAmount = parseFloat(order[1]);
@@ -96,8 +93,7 @@ async function getOrderBook(action, amountRequested) {
           amountRequested -= availableAmount;
         }
       }
-    } else if (action.toLowerCase() === "sell") {
-      //selling to nobitex
+    } else if (action === "فروش") {
       for (let order of buy) {
         const price = parseFloat(order[0]);
         const availableAmount = parseFloat(order[1]);
@@ -113,8 +109,7 @@ async function getOrderBook(action, amountRequested) {
         }
       }
     } else {
-      console.log("Invalid action. Please specify 'buy' or 'sell'.");
-      return;
+      return { bestMessage: "Invalid action. Please specify 'buy' or 'sell'." };
     }
 
     //average price for nobitex
@@ -123,105 +118,132 @@ async function getOrderBook(action, amountRequested) {
 
     //fetch data from wallex
     const { asks, bids } = await fetchData();
-    let totalPriceWallex = calculateTotal(
-      asks,
-      bids,
-      action.toLowerCase(),
-      amountRequested
-    );
+    let totalPriceWallex = calculateTotal(asks, bids, action, amountRequested);
 
-    //fetch data from ramzinex
     const { buys: ramzinexBuys, sells: ramzinexSells } = await ramzinex();
 
-    //fetch data from tabdeal
     const { buys: tabdealBuys, sells: tabdealSells } = await tabdeal();
 
-    //calculate total for ramzinex
     let totalPriceRamzinex = calculateTotal(
       ramzinexSells,
       ramzinexBuys,
-      action.toLowerCase(),
+      action,
       amountRequested
     );
 
-    //calculate total for tabdeal
     let totalPriceTabdeal = calculateTotal(
       tabdealSells,
       tabdealBuys,
-      action.toLowerCase(),
+      action,
       amountRequested
     );
 
-    //display total prices
-    if (action.toLowerCase() === "buy") {
-      console.log(
-        `Total price for buying from NOBITEX: ${totalPriceNobitex / 10}`
-      );
-      console.log(`Total price for buying from WALLEX: ${totalPriceWallex}`);
-      console.log(
-        `Total price for buying from Ramzinex: ${totalPriceRamzinex / 10}`
-      );
-      console.log(`Total price for buying from Tabdeal: ${totalPriceTabdeal}`);
+    if (action === "خرید") {
+      total_buy_nobitex = totalPriceNobitex / 10;
+      total__buy_wallex = totalPriceWallex;
+      total_buy_ramzinex = totalPriceRamzinex / 10;
+      total_buy_tabdeal = totalPriceTabdeal;
     } else {
-      console.log(
-        `Total price for selling to NOBITEX: ${totalPriceNobitex / 10}`
-      );
-      console.log(`Total price for selling to WALLEX: ${totalPriceWallex}`);
-      console.log(
-        `Total price for selling to Ramzinex: ${totalPriceRamzinex / 10}`
-      );
-      console.log(`Total price for selling to Tabdeal: ${totalPriceTabdeal}`);
+      total_sell_nobitex = totalPriceNobitex / 10;
+      total__sell_wallex = totalPriceWallex;
+      total_sell_ramzinex = totalPriceRamzinex / 10;
+      total_sell_tabdeal = totalPriceTabdeal;
     }
 
-    //determine the most economical option for selling
     let maxPrice;
     let bestExchange;
 
-    if (action.toLowerCase() === "sell") {
+    if (action === "فروش") {
       maxPrice = Math.max(
-        totalPriceNobitex / 10,
-        totalPriceWallex,
-        totalPriceRamzinex / 10,
-        totalPriceTabdeal
+        total_sell_nobitex,
+        total__sell_wallex,
+        total_sell_ramzinex,
+        total_sell_tabdeal
       );
       bestExchange =
-        maxPrice === totalPriceNobitex / 10
+        maxPrice === total_sell_nobitex
           ? "NOBITEX"
-          : maxPrice === totalPriceWallex
+          : maxPrice === total__sell_wallex
           ? "WALLEX"
-          : maxPrice === totalPriceRamzinex / 10
+          : maxPrice === total_sell_ramzinex
           ? "Ramzinex"
           : "Tabdeal";
+      const exchangeTranslations = {
+        NOBITEX: "نوبیتکس",
+        WALLEX: "والکس",
+        Ramzinex: "رمزینکس",
+        Tabdeal: "تبدیل",
+      };
+      return {
+        bestMessage: `▪ نوبیتکس : ${formatThousands(
+          Math.floor(total_sell_nobitex),
+          ","
+        )} ریال\n▪ والکس : ${formatThousands(
+          Math.floor(total__sell_wallex),
+          ","
+        )} ریال\n▪ رمزینکس : ${formatThousands(
+          Math.floor(total_sell_ramzinex),
+          ","
+        )} ریال\n▪ تبدیل : ${formatThousands(
+          Math.floor(total_sell_tabdeal),
+          ","
+        )} ریال\n\n⬆️ بهترین صرافی برای ${action} ${amountRequested} تتر ${
+          exchangeTranslations[bestExchange]
+        } با قیمت کل ${formatThousands(
+          Math.floor(maxPrice),
+          ","
+        )} ریال است.\n\n 🗓${date}\n\n ${process.env.ID}`,
+      };
     } else {
-      //for buying, keep the previous logic
       maxPrice = Math.min(
-        totalPriceNobitex / 10,
-        totalPriceWallex,
-        totalPriceRamzinex / 10,
-        totalPriceTabdeal
+        total_buy_nobitex,
+        total__buy_wallex,
+        total_buy_ramzinex,
+        total_buy_tabdeal
       );
       bestExchange =
-        maxPrice === totalPriceNobitex / 10
+        maxPrice === total_buy_nobitex
           ? "NOBITEX"
-          : maxPrice === totalPriceWallex
+          : maxPrice === total__buy_wallex
           ? "WALLEX"
-          : maxPrice === totalPriceRamzinex / 10
+          : maxPrice === total_buy_ramzinex
           ? "Ramzinex"
           : "Tabdeal";
     }
-
-    console.log(
-      `The most economical option for ${action} is: ${bestExchange} with a total price of ${maxPrice}`
-    );
+    const exchangeTranslations = {
+      NOBITEX: "نوبیتکس",
+      WALLEX: "والکس",
+      Ramzinex: "رمزینکس",
+      Tabdeal: "تبدیل",
+    };
+    return {
+      bestMessage: `▪ نوبیتکس : ${formatThousands(
+        Math.floor(total_buy_nobitex),
+        ","
+      )} \n▪ والکس : ${formatThousands(
+        Math.floor(total__buy_wallex),
+        ","
+      )} \n▪ رمزینکس : ${formatThousands(
+        Math.floor(total_buy_ramzinex),
+        ","
+      )} \n▪ تبدیل : ${formatThousands(
+        Math.floor(total_buy_tabdeal),
+        ","
+      )} \n\n⬇️ بهترین صرافی برای ${action} ${amountRequested} تتر ${
+        exchangeTranslations[bestExchange]
+      } با قیمت کل ${formatThousands(
+        Math.floor(maxPrice),
+        ","
+      )}  است.\n\n 🗓${date}\n\n ${process.env.ID}`,
+    };
   } catch (error) {
-    console.error("Error fetching order book:", error);
+    return { bestMessage: "An error occurred while fetching the order book." };
   }
 }
 
 //function to calculate total cost/revenue
 function calculateTotal(asks, bids, action, amount) {
-  if (action === "buy") {
-    //calculate total cost for buying
+  if (action === "خرید") {
     let totalCost = 0;
     for (const ask of asks) {
       const quantity = Math.min(ask.quantity, amount);
@@ -230,8 +252,7 @@ function calculateTotal(asks, bids, action, amount) {
       if (amount <= 0) break;
     }
     return totalCost;
-  } else if (action === "sell") {
-    //calculate total revenue for selling
+  } else if (action === "فروش") {
     let totalRevenue = 0;
     for (const bid of bids) {
       const quantity = Math.min(bid.quantity, amount);
@@ -245,17 +266,4 @@ function calculateTotal(asks, bids, action, amount) {
   }
 }
 
-// main function to get user input and call getOrderBook
-async function main() {
-  rl.question(
-    `Do you want to buy or sell? (type "buy" or "sell") :`,
-    async (action) => {
-      rl.question("Enter the amount of tether: ", async (amount) => {
-        await getOrderBook(action, parseFloat(amount));
-        rl.close();
-      });
-    }
-  );
-}
-
-main();
+module.exports.getOrderBook = getOrderBook;

@@ -3,6 +3,8 @@ const axios = require("axios");
 require("dotenv").config();
 let TOKEN = process.env.BOT_TOKEN;
 const bot = new TelegramBot(TOKEN, { polling: true });
+const orderBook = require("./orderBook");
+let formatThousands = require("format-thousands");
 
 //main menu
 bot.onText(/\/start/, (msg) => {
@@ -195,7 +197,7 @@ const generateCoinMessage = () => {
       message += `${hr}\n\n`;
     }
   });
-  message += `\n🗓 ${date}`;
+  message += `\n🗓 ${date}\n\n ${process.env.ID}`;
   return message;
 };
 // set interval for coin message
@@ -225,7 +227,7 @@ setInterval(() => {
             (index < oilTypes.length - 1 ? `${hr}\n\n` : "")
         )
         .join("") +
-      `\n🗓 ${date}`;
+      `\n🗓 ${date}\n\n ${process.env.ID}`;
 }, 2 * 1000);
 
 // USD, EUR, GBP message
@@ -242,7 +244,7 @@ const createCurrencyMessage = (currency, data) => {
     `نرخ فعلی : ${data.current} \n\n` +
     `بالاترین : ${data.max}\n\n` +
     `پایین ترین : ${data.min}\n\n` +
-    `زمان ثبت آخرین نرخ : ${data.time}\n\n\n🗓 ${date}`
+    `زمان ثبت آخرین نرخ : ${data.time}\n\n\n🗓 ${date}\n\n ${process.env.ID}`
   );
 };
 setInterval(() => {
@@ -287,7 +289,10 @@ setInterval(function makeMsg() {
   } else {
     orderedCoins.forEach((coin) => {
       if (prices[coin]) {
-        message += `▪ ${coin}-USDT : ${prices[coin]} \n \n`;
+        message += `▪ ${coin}-USDT : ${formatThousands(
+          prices[coin],
+          ","
+        )} \n \n`;
       }
     });
     Object.entries(prices)
@@ -298,7 +303,8 @@ setInterval(function makeMsg() {
           message += `▪ ${key}-USDT : ${value} \n \n`;
         }
       });
-    message += ` \n \n 🗓 ${date}`;
+    message += `\n🗓 ${date} \n \n`;
+    message += `${process.env.ID}`;
   }
 }, 2 * 1000);
 
@@ -320,7 +326,7 @@ function convertPersianToEnglish(input) {
 }
 
 // response and menu and tether message
-let amount = "";
+let amountRequested = "";
 let action = "";
 let pr_text = "بازگشت به منوی اصلی";
 bot.on("message", (msg) => {
@@ -348,7 +354,10 @@ bot.on("message", (msg) => {
     } else {
       bot.sendMessage(
         msg.chat.id,
-        `قیمت کنونی تتر : ${global.USDT_price} ریال\n\n 🗓 ${date}`,
+        `قیمت کنونی تتر : ${formatThousands(
+          global.USDT_price,
+          ","
+        )} ریال\n\n 🗓 ${date}\n\n ${process.env.ID}`,
         { reply_to_message_id: msg.message_id }
       );
     }
@@ -368,7 +377,6 @@ bot.on("message", (msg) => {
     });
   } else if (msg.text == "خرید") {
     action = msg.text;
-    console.log(action);
     bot
       .sendMessage(msg.chat.id, "مقدار مورد نظر خود را برای خرید وارد کنید.", {
         reply_markup: {
@@ -377,10 +385,8 @@ bot.on("message", (msg) => {
         },
       })
       .then(() => {
-        // Step 2: Listen for the User's Response
         bot.once("message", (response) => {
           if (response.text === "بازگشت") {
-            // If the user enters "بازگشت"
             bot.sendMessage(msg.chat.id, "انتخاب کن", {
               reply_markup: {
                 resize_keyboard: true,
@@ -389,14 +395,35 @@ bot.on("message", (msg) => {
             });
           } else {
             const convertedAmount = convertPersianToEnglish(response.text);
-            amount = parseFloat(convertedAmount);
-            if (!isNaN(amount) && amount > 0) {
-              // Step 3: Process the Valid Input
-              bot.sendMessage(msg.chat.id, `لطفا منتظز بمانید.`, {
+            amountRequested = parseFloat(convertedAmount);
+            if (!isNaN(amountRequested) && amountRequested > 0) {
+              bot.sendMessage(msg.chat.id, `لطفا منتظر بمانید.`, {
                 reply_to_message_id: response.message_id,
               });
-              // Here you can add further logic to handle the purchase
-              console.log(amount);
+              orderBook.getOrderBook(action, amountRequested).then((result) => {
+                const bestMessage = result.bestMessage;
+                if (bestMessage) {
+                  bot.sendMessage(msg.chat.id, bestMessage, {
+                    reply_markup: {
+                      resize_keyboard: true,
+                      keyboard: [
+                        ["قیمت کنونی", "مقایسه بازار ها"],
+                        [`${pr_text}`],
+                      ],
+                    },
+                  });
+                } else {
+                  bot.sendMessage(msg.chat.id, "لطفا دوباره تلاش کنید.", {
+                    reply_markup: {
+                      resize_keyboard: true,
+                      keyboard: [
+                        ["قیمت کنونی", "مقایسه بازار ها"],
+                        [`${pr_text}`],
+                      ],
+                    },
+                  });
+                }
+              });
             } else {
               bot.sendMessage(msg.chat.id, "لطفا یک مقدار معتبر وارد کنید.", {
                 reply_to_message_id: response.message_id,
@@ -407,7 +434,6 @@ bot.on("message", (msg) => {
       });
   } else if (msg.text == "فروش") {
     action = msg.text;
-    console.log(action);
     bot
       .sendMessage(msg.chat.id, "مقدار مورد نظر خود را برای فروش وارد کنید.", {
         reply_markup: {
@@ -416,10 +442,8 @@ bot.on("message", (msg) => {
         },
       })
       .then(() => {
-        // Step 2: Listen for the User's Response
         bot.once("message", (response) => {
           if (response.text === "بازگشت") {
-            // If the user enters "بازگشت"
             bot.sendMessage(msg.chat.id, "انتخاب کن", {
               reply_markup: {
                 resize_keyboard: true,
@@ -428,14 +452,35 @@ bot.on("message", (msg) => {
             });
           } else {
             const convertedAmount = convertPersianToEnglish(response.text);
-            amount = parseFloat(convertedAmount);
-            if (!isNaN(amount) && amount > 0) {
-              // Step 3: Process the Valid Input
-              bot.sendMessage(msg.chat.id, `لطفا منتظز بمانید.`, {
+            amountRequested = parseFloat(convertedAmount);
+            if (!isNaN(amountRequested) && amountRequested > 0) {
+              bot.sendMessage(msg.chat.id, `لطفا منتظر بمانید.`, {
                 reply_to_message_id: response.message_id,
               });
-              // Here you can add further logic to handle the purchase
-              console.log(amount);
+              orderBook.getOrderBook(action, amountRequested).then((result) => {
+                const bestMessage = result.bestMessage;
+                if (bestMessage) {
+                  bot.sendMessage(msg.chat.id, bestMessage, {
+                    reply_markup: {
+                      resize_keyboard: true,
+                      keyboard: [
+                        ["قیمت کنونی", "مقایسه بازار ها"],
+                        [`${pr_text}`],
+                      ],
+                    },
+                  });
+                } else {
+                  bot.sendMessage(msg.chat.id, "لطفا دوباره تلاش کنید.", {
+                    reply_markup: {
+                      resize_keyboard: true,
+                      keyboard: [
+                        ["قیمت کنونی", "مقایسه بازار ها"],
+                        [`${pr_text}`],
+                      ],
+                    },
+                  });
+                }
+              });
             } else {
               bot.sendMessage(msg.chat.id, "لطفا یک مقدار معتبر وارد کنید.", {
                 reply_to_message_id: response.message_id,
