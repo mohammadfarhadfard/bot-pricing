@@ -1,74 +1,16 @@
 const axios = require("axios");
 require("dotenv").config();
 let formatThousands = require("format-thousands");
-let WALLEX = process.env.WALLEX_Route;
 let NOBITEX = process.env.NOBITEX_Route;
-let RAMZINEX = process.env.RAMZINEX_Route;
-let TABDEAL = process.env.TABDEAL_Route;
+const wallex = require("./pricing/wallex");
+const ramzinex = require("./pricing/ramzinex");
+const tabdeal = require("./pricing/tabdeal");
 
-//get date
+// get date
 const moment = require("jalali-moment");
 let date = moment().locale("fa").format("YYYY/M/D hh:mm");
 
-//data from wallex
-async function fetchData() {
-  try {
-    const response = await axios.get(WALLEX);
-    const asks = response.data.result.ask || [];
-    const bids = response.data.result.bid || [];
-    return { asks, bids };
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    return { asks: [], bids: [] };
-  }
-}
-
-// Fetch data from tabdeal
-async function tabdeal() {
-  try {
-    const { data } = await axios.get(TABDEAL);
-    const tabdeal_buys = data.bids.map((order) => ({
-      price: parseFloat(order[0]),
-      quantity: parseFloat(order[1]),
-    }));
-    const tabdeal_sells = data.asks.map((order) => ({
-      price: parseFloat(order[0]),
-      quantity: parseFloat(order[1]),
-    }));
-    return {
-      buys: tabdeal_buys,
-      sells: tabdeal_sells,
-    };
-  } catch (error) {
-    console.error("Error fetching Tabdeal data:", error);
-  }
-}
-
-//function to fetch data from ramzinex
-async function ramzinex() {
-  try {
-    const response = await axios.get(RAMZINEX);
-
-    const ramzinex_buys = response.data.data.buys.map((order) => ({
-      price: parseFloat(order[0]),
-      quantity: parseFloat(order[1]),
-    }));
-
-    const ramzinex_sells = response.data.data.sells.map((order) => ({
-      price: parseFloat(order[0]),
-      quantity: parseFloat(order[1]),
-    }));
-
-    return {
-      buys: ramzinex_buys,
-      sells: ramzinex_sells,
-    };
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    return { buys: [], sells: [] };
-  }
-}
-//data from nobitex and Averaging
+// nobitex pricing and Averaging
 async function getOrderBook(action, amountRequested) {
   try {
     const response = await axios.get(NOBITEX);
@@ -108,21 +50,20 @@ async function getOrderBook(action, amountRequested) {
           amountRequested -= availableAmount;
         }
       }
-    } else {
-      return { bestMessage: "Invalid action. Please specify 'buy' or 'sell'." };
     }
 
     //average price for nobitex
     const averagePriceNobitex =
       totalAmountNobitex > 0 ? totalPriceNobitex / totalAmountNobitex : 0;
 
-    //fetch data from wallex
-    const { asks, bids } = await fetchData();
+    // data from wallex
+    const { asks, bids } = await wallex.wallex();
     let totalPriceWallex = calculateTotal(asks, bids, action, amountRequested);
 
-    const { buys: ramzinexBuys, sells: ramzinexSells } = await ramzinex();
+    const { buys: ramzinexBuys, sells: ramzinexSells } =
+      await ramzinex.ramzinex();
 
-    const { buys: tabdealBuys, sells: tabdealSells } = await tabdeal();
+    const { buys: tabdealBuys, sells: tabdealSells } = await tabdeal.tabdeal();
 
     let totalPriceRamzinex = calculateTotal(
       ramzinexSells,
@@ -175,7 +116,7 @@ async function getOrderBook(action, amountRequested) {
         Tabdeal: "تبدیل",
       };
       return {
-        bestMessage: `▪ نوبیتکس : ${formatThousands(
+        bestMessage: `🔸قیمت ها به تومان است\n\n▪ نوبیتکس : ${formatThousands(
           Math.floor(total_sell_nobitex),
           ","
         )} ریال\n▪ والکس : ${formatThousands(
@@ -217,7 +158,7 @@ async function getOrderBook(action, amountRequested) {
       Tabdeal: "تبدیل",
     };
     return {
-      bestMessage: `▪ نوبیتکس : ${formatThousands(
+      bestMessage: `🔸 قیمت ها به تومان است\n\n▪ نوبیتکس : ${formatThousands(
         Math.floor(total_buy_nobitex),
         ","
       )} \n▪ والکس : ${formatThousands(
@@ -237,11 +178,11 @@ async function getOrderBook(action, amountRequested) {
       )}  است.\n\n 🗓${date}\n\n ${process.env.ID}`,
     };
   } catch (error) {
-    return { bestMessage: "An error occurred while fetching the order book." };
+    return { bestMessage: `🚫 مشکلی پیش آمده دوباره تلاش کنید.` };
   }
 }
 
-//function to calculate total cost/revenue
+// calculate total cost/revenue
 function calculateTotal(asks, bids, action, amount) {
   if (action === "خرید") {
     let totalCost = 0;

@@ -6,7 +6,7 @@ const bot = new TelegramBot(TOKEN, { polling: true });
 const orderBook = require("./orderBook");
 let formatThousands = require("format-thousands");
 
-//main menu
+// main menu
 bot.onText(/\/start/, (msg) => {
   bot.sendMessage(
     msg.chat.id,
@@ -25,11 +25,11 @@ bot.onText(/\/start/, (msg) => {
   );
 });
 
-//get date
+// get date
 const moment = require("jalali-moment");
 let date = moment().locale("fa").format("YYYY/M/D hh:mm");
 
-//get crypto prices
+// crypto pricing
 const coins = [
   "BTC",
   "ETH",
@@ -59,7 +59,7 @@ coins.forEach((coin) => {
   }, 2 * 1000);
 });
 
-//get tether price
+// tether pricing
 setInterval(() => {
   let nobitex = "https://api.nobitex.ir/v2/orderbook/USDTIRT";
   axios
@@ -72,7 +72,7 @@ setInterval(() => {
     });
 }, 2 * 1000);
 
-//get dollar,eur,gbp prices
+// USD, EUR, GBP pricing
 const fetchCurrencyPrice = (key) => {
   let dprice = `https://raw.githubusercontent.com/margani/pricedb/main/tgju/current/${key}/latest.json`;
   axios
@@ -115,7 +115,7 @@ allKey.forEach((key) => {
   setInterval(() => fetchCurrencyPrice(key), 3 * 1000);
 });
 
-// get oil prices
+// oil pricing
 const oilKeys = ["oil_opec", "oil_brent", "oil"];
 oilKeys.forEach((key) => {
   setInterval(() => {
@@ -130,7 +130,7 @@ oilKeys.forEach((key) => {
   }, 3 * 1000);
 });
 
-// get coin prices
+// coin pricing
 const fetchCoinPrices = (keys) => {
   keys.forEach((key) => {
     setInterval(() => {
@@ -152,7 +152,7 @@ const fetchCoinPrices = (keys) => {
 let coinKeys = ["sekee", "sekeb", "nim", "rob", "gerami"];
 fetchCoinPrices(coinKeys);
 
-//function to return the unavailable price message
+// return the unavailable price message
 const getUnavailablePriceMessage = () => {
   return `🚫 قیمت تتر در حال حاضر در دسترس نیست. لطفا بعدا دوباره تلاش کنید.`;
 };
@@ -200,7 +200,6 @@ const generateCoinMessage = () => {
   message += `\n🗓 ${date}\n\n ${process.env.ID}`;
   return message;
 };
-// set interval for coin message
 setInterval(() => {
   coinMessage = generateCoinMessage();
 }, 2 * 1000);
@@ -336,6 +335,7 @@ bot.on("message", (msg) => {
         resize_keyboard: true,
         keyboard: [[`قیمت کنونی`, "مقایسه بازار ها"], [`${pr_text}`]],
       },
+      reply_to_message_id: msg.message_id,
     });
   } else if (msg.text == pr_text) {
     bot.sendMessage(msg.chat.id, `خب چه کاری برات انجام بدم؟`, {
@@ -347,10 +347,13 @@ bot.on("message", (msg) => {
           ["🌕 سکه", "🛢️ نفت"],
         ],
       },
+      reply_to_message_id: msg.message_id,
     });
   } else if (msg.text == `قیمت کنونی`) {
     if (global.USDT_price === undefined) {
-      getUnavailablePriceMessage(), { reply_to_message_id: msg.message_id };
+      bot.sendMessage(msg.chat.id, getUnavailablePriceMessage(), {
+        reply_to_message_id: msg.message_id,
+      });
     } else {
       bot.sendMessage(
         msg.chat.id,
@@ -358,7 +361,9 @@ bot.on("message", (msg) => {
           global.USDT_price,
           ","
         )} ریال\n\n 🗓 ${date}\n\n ${process.env.ID}`,
-        { reply_to_message_id: msg.message_id }
+        {
+          reply_to_message_id: msg.message_id,
+        }
       );
     }
   } else if (msg.text == "مقایسه بازار ها") {
@@ -367,13 +372,15 @@ bot.on("message", (msg) => {
         resize_keyboard: true,
         keyboard: [["فروش", "خرید"], [`بازگشت به منوی قبلی`]],
       },
+      reply_to_message_id: msg.message_id,
     });
-  } else if (msg.text == `بازگشت به منوی قبلی`) {
+  } else if (msg.text == "بازگشت به منوی قبلی") {
     bot.sendMessage(msg.chat.id, `انتخاب کن`, {
       reply_markup: {
         resize_keyboard: true,
         keyboard: [[`قیمت کنونی`, "مقایسه بازار ها"], [`${pr_text}`]],
       },
+      reply_to_message_id: msg.message_id,
     });
   } else if (msg.text == "خرید") {
     action = msg.text;
@@ -383,6 +390,7 @@ bot.on("message", (msg) => {
           resize_keyboard: true,
           keyboard: [["فروش", "خرید"], ["بازگشت"]],
         },
+        reply_to_message_id: msg.message_id,
       })
       .then(() => {
         bot.once("message", (response) => {
@@ -392,41 +400,276 @@ bot.on("message", (msg) => {
                 resize_keyboard: true,
                 keyboard: [["قیمت کنونی", "مقایسه بازار ها"], [`${pr_text}`]],
               },
+              reply_to_message_id: response.message_id,
             });
+          } else if (response.text === "فروش") {
+            bot
+              .sendMessage(
+                msg.chat.id,
+                "مقدار مورد نظر خود را برای فروش وارد کنید.",
+                {
+                  reply_markup: {
+                    resize_keyboard: true,
+                    keyboard: [["فروش", "خرید"], ["بازگشت"]],
+                  },
+                  reply_to_message_id: response.message_id,
+                }
+              )
+              .then(() => {
+                action = "فروش";
+                bot.once("message", (newResponse) => {
+                  if (newResponse.text === "بازگشت") {
+                    bot.sendMessage(msg.chat.id, "انتخاب کن", {
+                      reply_markup: {
+                        resize_keyboard: true,
+                        keyboard: [
+                          ["قیمت کنونی", "مقایسه بازار ها"],
+                          [`${pr_text}`],
+                        ],
+                      },
+                      reply_to_message_id: newResponse.message_id,
+                    });
+                  } else {
+                    const convertedAmount = convertPersianToEnglish(
+                      newResponse.text
+                    );
+                    amountRequested = parseFloat(convertedAmount);
+                    if (!isNaN(amountRequested) && amountRequested > 0) {
+                      if (amountRequested > 99999) {
+                        bot.sendMessage(
+                          msg.chat.id,
+                          `مقدار وارد شده باید حداکثر چهار رقم باشد.`,
+                          {
+                            reply_to_message_id: newResponse.message_id,
+                          }
+                        );
+                      } else {
+                        bot.sendMessage(msg.chat.id, `لطفا منتظر بمانید.`, {
+                          reply_to_message_id: newResponse.message_id,
+                        });
+                        console.log(
+                          "Amount requested before sending to orderBook:",
+                          amountRequested
+                        );
+
+                        orderBook
+                          .getOrderBook(action, amountRequested)
+                          .then((result) => {
+                            const bestMessage = result.bestMessage;
+                            if (bestMessage) {
+                              bot.sendMessage(msg.chat.id, bestMessage, {
+                                reply_markup: {
+                                  resize_keyboard: true,
+                                  keyboard: [
+                                    ["قیمت کنونی", "مقایسه بازار ها"],
+                                    [`${pr_text}`],
+                                  ],
+                                },
+                                reply_to_message_id: newResponse.message_id,
+                              });
+                            } else {
+                              bot.sendMessage(
+                                msg.chat.id,
+                                "لطفا دوباره تلاش کنید.",
+                                {
+                                  reply_markup: {
+                                    resize_keyboard: true,
+                                    keyboard: [
+                                      ["قیمت کنونی", "مقایسه بازار ها"],
+                                      [`${pr_text}`],
+                                    ],
+                                  },
+                                  reply_to_message_id: newResponse.message_id,
+                                }
+                              );
+                            }
+                          });
+                      }
+                    } else {
+                      bot.sendMessage(
+                        msg.chat.id,
+                        "لطفا یک مقدار معتبر وارد کنید.",
+                        {
+                          reply_to_message_id: newResponse.message_id,
+                        }
+                      );
+                      bot.once("message", (newAmountResponse) => {
+                        const convertedNewAmount = convertPersianToEnglish(
+                          newAmountResponse.text
+                        );
+                        amountRequested = parseFloat(convertedNewAmount);
+                        if (!isNaN(amountRequested) && amountRequested > 0) {
+                          if (amountRequested > 99999) {
+                            bot.sendMessage(
+                              msg.chat.id,
+                              `مقدار وارد شده باید حداکثر چهار رقم باشد.`,
+                              {
+                                reply_to_message_id:
+                                  newAmountResponse.message_id,
+                              }
+                            );
+                          } else {
+                            bot.sendMessage(msg.chat.id, `لطفا منتظر بمانید.`, {
+                              reply_to_message_id: newAmountResponse.message_id,
+                            });
+                            orderBook
+                              .getOrderBook(action, amountRequested)
+                              .then((result) => {
+                                const bestMessage = result.bestMessage;
+                                if (bestMessage) {
+                                  bot.sendMessage(msg.chat.id, bestMessage, {
+                                    reply_markup: {
+                                      resize_keyboard: true,
+                                      keyboard: [
+                                        ["قیمت کنونی", "مقایسه بازار ها"],
+                                        [`${pr_text}`],
+                                      ],
+                                    },
+                                    reply_to_message_id:
+                                      newAmountResponse.message_id,
+                                  });
+                                } else {
+                                  bot.sendMessage(
+                                    msg.chat.id,
+                                    "لطفا دوباره تلاش کنید.",
+                                    {
+                                      reply_markup: {
+                                        resize_keyboard: true,
+                                        keyboard: [
+                                          ["قیمت کنونی", "مقایسه بازار ها"],
+                                          [`${pr_text}`],
+                                        ],
+                                      },
+                                      reply_to_message_id:
+                                        newAmountResponse.message_id,
+                                    }
+                                  );
+                                }
+                              });
+                          }
+                        } else {
+                          bot.sendMessage(
+                            msg.chat.id,
+                            "لطفا یک مقدار معتبر وارد کنید.",
+                            {
+                              reply_to_message_id: newAmountResponse.message_id,
+                            }
+                          );
+                        }
+                      });
+                    }
+                  }
+                });
+              });
           } else {
             const convertedAmount = convertPersianToEnglish(response.text);
             amountRequested = parseFloat(convertedAmount);
             if (!isNaN(amountRequested) && amountRequested > 0) {
-              bot.sendMessage(msg.chat.id, `لطفا منتظر بمانید.`, {
-                reply_to_message_id: response.message_id,
-              });
-              orderBook.getOrderBook(action, amountRequested).then((result) => {
-                const bestMessage = result.bestMessage;
-                if (bestMessage) {
-                  bot.sendMessage(msg.chat.id, bestMessage, {
-                    reply_markup: {
-                      resize_keyboard: true,
-                      keyboard: [
-                        ["قیمت کنونی", "مقایسه بازار ها"],
-                        [`${pr_text}`],
-                      ],
-                    },
+              if (amountRequested > 99999) {
+                bot.sendMessage(
+                  msg.chat.id,
+                  `مقدار وارد شده باید حداکثر چهار رقم باشد.`,
+                  {
+                    reply_to_message_id: response.message_id,
+                  }
+                );
+              } else {
+                bot.sendMessage(msg.chat.id, `لطفا منتظر بمانید.`, {
+                  reply_to_message_id: response.message_id,
+                });
+                orderBook
+                  .getOrderBook(action, amountRequested)
+                  .then((result) => {
+                    const bestMessage = result.bestMessage;
+                    if (bestMessage) {
+                      bot.sendMessage(msg.chat.id, bestMessage, {
+                        reply_markup: {
+                          resize_keyboard: true,
+                          keyboard: [
+                            ["قیمت کنونی", "مقایسه بازار ها"],
+                            [`${pr_text}`],
+                          ],
+                        },
+                        reply_to_message_id: response.message_id,
+                      });
+                    } else {
+                      bot.sendMessage(msg.chat.id, "لطفا دوباره تلاش کنید.", {
+                        reply_markup: {
+                          resize_keyboard: true,
+                          keyboard: [
+                            ["قیمت کنونی", "مقایسه بازار ها"],
+                            [`${pr_text}`],
+                          ],
+                        },
+                        reply_to_message_id: response.message_id,
+                      });
+                    }
                   });
-                } else {
-                  bot.sendMessage(msg.chat.id, "لطفا دوباره تلاش کنید.", {
-                    reply_markup: {
-                      resize_keyboard: true,
-                      keyboard: [
-                        ["قیمت کنونی", "مقایسه بازار ها"],
-                        [`${pr_text}`],
-                      ],
-                    },
-                  });
-                }
-              });
+              }
             } else {
               bot.sendMessage(msg.chat.id, "لطفا یک مقدار معتبر وارد کنید.", {
                 reply_to_message_id: response.message_id,
+              });
+              bot.once("message", (newAmountResponse) => {
+                const convertedNewAmount = convertPersianToEnglish(
+                  newAmountResponse.text
+                );
+                amountRequested = parseFloat(convertedNewAmount);
+                if (!isNaN(amountRequested) && amountRequested > 0) {
+                  if (amountRequested > 99999) {
+                    bot.sendMessage(
+                      msg.chat.id,
+                      `مقدار وارد شده باید حداکثر چهار رقم باشد.`,
+                      {
+                        reply_to_message_id: newAmountResponse.message_id,
+                      }
+                    );
+                  } else {
+                    bot.sendMessage(msg.chat.id, `لطفا منتظر بمانید.`, {
+                      reply_to_message_id: newAmountResponse.message_id,
+                    });
+                    orderBook
+                      .getOrderBook(action, amountRequested)
+                      .then((result) => {
+                        const bestMessage = result.bestMessage;
+                        if (bestMessage) {
+                          bot.sendMessage(msg.chat.id, bestMessage, {
+                            reply_markup: {
+                              resize_keyboard: true,
+                              keyboard: [
+                                ["قیمت کنونی", "مقایسه بازار ها"],
+                                [`${pr_text}`],
+                              ],
+                            },
+                            reply_to_message_id: newAmountResponse.message_id,
+                          });
+                        } else {
+                          bot.sendMessage(
+                            msg.chat.id,
+                            "لطفا دوباره تلاش کنید.",
+                            {
+                              reply_markup: {
+                                resize_keyboard: true,
+                                keyboard: [
+                                  ["قیمت کنونی", "مقایسه بازار ها"],
+                                  [`${pr_text}`],
+                                ],
+                              },
+                              reply_to_message_id: newAmountResponse.message_id,
+                            }
+                          );
+                        }
+                      });
+                  }
+                } else {
+                  bot.sendMessage(
+                    msg.chat.id,
+                    "لطفا یک مقدار معتبر وارد کنید.",
+                    {
+                      reply_to_message_id: newAmountResponse.message_id,
+                    }
+                  );
+                }
               });
             }
           }
@@ -440,6 +683,7 @@ bot.on("message", (msg) => {
           resize_keyboard: true,
           keyboard: [["فروش", "خرید"], ["بازگشت"]],
         },
+        reply_to_message_id: msg.message_id,
       })
       .then(() => {
         bot.once("message", (response) => {
@@ -449,41 +693,117 @@ bot.on("message", (msg) => {
                 resize_keyboard: true,
                 keyboard: [["قیمت کنونی", "مقایسه بازار ها"], [`${pr_text}`]],
               },
+              reply_to_message_id: response.message_id,
             });
           } else {
             const convertedAmount = convertPersianToEnglish(response.text);
             amountRequested = parseFloat(convertedAmount);
             if (!isNaN(amountRequested) && amountRequested > 0) {
-              bot.sendMessage(msg.chat.id, `لطفا منتظر بمانید.`, {
-                reply_to_message_id: response.message_id,
-              });
-              orderBook.getOrderBook(action, amountRequested).then((result) => {
-                const bestMessage = result.bestMessage;
-                if (bestMessage) {
-                  bot.sendMessage(msg.chat.id, bestMessage, {
-                    reply_markup: {
-                      resize_keyboard: true,
-                      keyboard: [
-                        ["قیمت کنونی", "مقایسه بازار ها"],
-                        [`${pr_text}`],
-                      ],
-                    },
+              if (amountRequested > 99999) {
+                bot.sendMessage(
+                  msg.chat.id,
+                  `مقدار وارد شده باید حداکثر چهار رقم باشد.`,
+                  {
+                    reply_to_message_id: response.message_id,
+                  }
+                );
+              } else {
+                bot.sendMessage(msg.chat.id, `لطفا منتظر بمانید.`, {
+                  reply_to_message_id: response.message_id,
+                });
+                orderBook
+                  .getOrderBook(action, amountRequested)
+                  .then((result) => {
+                    const bestMessage = result.bestMessage;
+                    if (bestMessage) {
+                      bot.sendMessage(msg.chat.id, bestMessage, {
+                        reply_markup: {
+                          resize_keyboard: true,
+                          keyboard: [
+                            ["قیمت کنونی", "مقایسه بازار ها"],
+                            [`${pr_text}`],
+                          ],
+                        },
+                        reply_to_message_id: response.message_id,
+                      });
+                    } else {
+                      bot.sendMessage(msg.chat.id, "لطفا دوباره تلاش کنید.", {
+                        reply_markup: {
+                          resize_keyboard: true,
+                          keyboard: [
+                            ["قیمت کنونی", "مقایسه بازار ها"],
+                            [`${pr_text}`],
+                          ],
+                        },
+                        reply_to_message_id: response.message_id,
+                      });
+                    }
                   });
-                } else {
-                  bot.sendMessage(msg.chat.id, "لطفا دوباره تلاش کنید.", {
-                    reply_markup: {
-                      resize_keyboard: true,
-                      keyboard: [
-                        ["قیمت کنونی", "مقایسه بازار ها"],
-                        [`${pr_text}`],
-                      ],
-                    },
-                  });
-                }
-              });
+              }
             } else {
               bot.sendMessage(msg.chat.id, "لطفا یک مقدار معتبر وارد کنید.", {
                 reply_to_message_id: response.message_id,
+              });
+              bot.once("message", (newAmountResponse) => {
+                const convertedNewAmount = convertPersianToEnglish(
+                  newAmountResponse.text
+                );
+                amountRequested = parseFloat(convertedNewAmount);
+                if (!isNaN(amountRequested) && amountRequested > 0) {
+                  if (amountRequested > 99999) {
+                    bot.sendMessage(
+                      msg.chat.id,
+                      `مقدار وارد شده باید حداکثر چهار رقم باشد.`,
+                      {
+                        reply_to_message_id: newAmountResponse.message_id,
+                      }
+                    );
+                  } else {
+                    bot.sendMessage(msg.chat.id, `لطفا منتظر بمانید.`, {
+                      reply_to_message_id: newAmountResponse.message_id,
+                    });
+                    orderBook
+                      .getOrderBook(action, amountRequested)
+                      .then((result) => {
+                        const bestMessage = result.bestMessage;
+                        if (bestMessage) {
+                          bot.sendMessage(msg.chat.id, bestMessage, {
+                            reply_markup: {
+                              resize_keyboard: true,
+                              keyboard: [
+                                ["قیمت کنونی", "مقایسه بازار ها"],
+                                [`${pr_text}`],
+                              ],
+                            },
+                            reply_to_message_id: newAmountResponse.message_id,
+                          });
+                        } else {
+                          bot.sendMessage(
+                            msg.chat.id,
+                            "لطفا دوباره تلاش کنید.",
+                            {
+                              reply_markup: {
+                                resize_keyboard: true,
+                                keyboard: [
+                                  ["قیمت کنونی", "مقایسه بازار ها"],
+                                  [`${pr_text}`],
+                                ],
+                              },
+                              reply_to_message_id: newAmountResponse.message_id,
+                            }
+                          );
+                        }
+                      });
+                  }
+                } else {
+                  bot.sendMessage(
+                    msg.chat.id,
+                    "لطفا یک مقدار معتبر وارد کنید.",
+                    {
+                      reply_to_message_id: newAmountResponse.message_id,
+                    }
+                  );
+                }
               });
             }
           }
@@ -499,6 +819,7 @@ bot.on("message", (msg) => {
         resize_keyboard: true,
         keyboard: [[`دلار(USD)`], ["یورو(EUR)", "پوند(GBP)"], [`${pr_text}`]],
       },
+      reply_to_message_id: msg.message_id,
     });
   } else if (msg.text == `دلار(USD)`) {
     bot.sendMessage(msg.chat.id, `${dollarMessage}`, {
@@ -522,6 +843,7 @@ bot.on("message", (msg) => {
           ["🌕 سکه", "🛢️ نفت"],
         ],
       },
+      reply_to_message_id: msg.message_id,
     });
   } else if (msg.text == "🌕 سکه") {
     bot.sendMessage(msg.chat.id, `${coinMessage}`, {
