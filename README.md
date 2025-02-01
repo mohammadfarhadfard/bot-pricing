@@ -1,10 +1,12 @@
 # This is my bot for providing cryptocurrency prices
 ### and also this bot is a bot that is getting updated every day with the prices of currencies, gold, etc in IRR (Iranian Rial).
+### It also has the ability to compare Tether prices on Iranian exchanges.
 
 
 
 
 * I update the offered prices from the [Kucoin](https://www.kucoin.com/) site.
+* Tether prices are updated from [Nobitex](https://nobitex.ir/panel/exchange/usdt-irt), [wallex](https://wallex.ir/app/trade/USDTTMN), [Ramzinex](https://ramzinex.com/app/markets/11/spot), [tabdeal](https://tabdeal.org/panel/trade/USDT_IRT) for comparison.
 
 * The price of Tether is taken separately from [Nobitex](https://nobitex.ir/).
 

@@ -183,23 +183,23 @@ async function getOrderBook(action, amountRequested) {
 }
 
 // calculate total cost/revenue
-function calculateTotal(asks, bids, action, amount) {
+function calculateTotal(asks, bids, action, amountRequested) {
   if (action === "خرید") {
     let totalCost = 0;
     for (const ask of asks) {
-      const quantity = Math.min(ask.quantity, amount);
+      const quantity = Math.min(ask.quantity, amountRequested);
       totalCost += ask.price * quantity;
-      amount -= quantity;
-      if (amount <= 0) break;
+      amountRequested -= quantity;
+      if (amountRequested <= 0) break;
     }
     return totalCost;
   } else if (action === "فروش") {
     let totalRevenue = 0;
     for (const bid of bids) {
-      const quantity = Math.min(bid.quantity, amount);
+      const quantity = Math.min(bid.quantity, amountRequested);
       totalRevenue += bid.price * quantity;
-      amount -= quantity;
-      if (amount <= 0) break;
+      amountRequested -= quantity;
+      if (amountRequested <= 0) break;
     }
     return totalRevenue;
   } else {

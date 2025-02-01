@@ -447,10 +447,6 @@ bot.on("message", (msg) => {
                         bot.sendMessage(msg.chat.id, `لطفا منتظر بمانید.`, {
                           reply_to_message_id: newResponse.message_id,
                         });
-                        console.log(
-                          "Amount requested before sending to orderBook:",
-                          amountRequested
-                        );
 
                         orderBook
                           .getOrderBook(action, amountRequested)
