@@ -214,7 +214,7 @@ const oilTypes = [
 ];
 setInterval(() => {
   const prices = oilTypes.map((oil) => global[oil.key]);
-  oliMessage = prices.includes(undefined)
+  oilMessage = prices.includes(undefined)
     ? getUnavailablePriceMessage()
     : `🔸 قیمت ها به دلار است\n\n\n` +
       oilTypes
@@ -403,7 +403,7 @@ bot.on("message", (msg) => {
         {
           reply_markup: {
             resize_keyboard: true,
-            keyboard: [["فروش", "خرید"], ["بازگشت"]],
+            keyboard : [["بازگشت"]],
           },
           reply_to_message_id: msg.message_id,
         }
@@ -450,7 +450,7 @@ bot.on("message", (msg) => {
               bot.sendMessage(msg.chat.id, result.bestMessage, {
                 reply_markup: {
                   resize_keyboard: true,
-                  keyboard: [["قیمت کنونی", "مقایسه بازار ها"], [`${pr_text}`]],
+                  keyboard: [["فروش", "خرید"], [`بازگشت به منوی قبلی`]],
                 },
                 reply_to_message_id: response.message_id,
               });
@@ -515,7 +515,7 @@ bot.on("message", (msg) => {
       break;
 
     case "🛢️ نفت":
-      bot.sendMessage(msg.chat.id, `${oliMessage}`, {
+      bot.sendMessage(msg.chat.id, `${oilMessage}`, {
         reply_to_message_id: msg.message_id,
       });
       break;
