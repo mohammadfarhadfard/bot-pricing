@@ -3,6 +3,7 @@ const axios = require("axios");
 require("dotenv").config();
 let TOKEN = process.env.BOT_TOKEN;
 const bot = new TelegramBot(TOKEN, { polling: true });
+let NOBITEX = process.env.NOBITEX_Route;
 const orderBook = require("./orderBook");
 let formatThousands = require("format-thousands");
 
@@ -61,9 +62,8 @@ coins.forEach((coin) => {
 
 // tether pricing
 setInterval(() => {
-  let nobitex = "https://api.nobitex.ir/v2/orderbook/USDTIRT";
   axios
-    .get(nobitex)
+    .get(NOBITEX)
     .then(function (response) {
       global.USDT_price = response.data.lastTradePrice;
     })
