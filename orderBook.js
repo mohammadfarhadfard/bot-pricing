@@ -119,21 +119,21 @@ async function getOrderBook(action, amountRequested) {
         bestMessage: `🔸قیمت ها به تومان است\n\n▪ نوبیتکس : ${formatThousands(
           Math.floor(total_sell_nobitex),
           ","
-        )} ریال\n▪ والکس : ${formatThousands(
+        )} \n▪ والکس : ${formatThousands(
           Math.floor(total__sell_wallex),
           ","
-        )} ریال\n▪ رمزینکس : ${formatThousands(
+        )} \n▪ رمزینکس : ${formatThousands(
           Math.floor(total_sell_ramzinex),
           ","
-        )} ریال\n▪ تبدیل : ${formatThousands(
+        )} \n▪ تبدیل : ${formatThousands(
           Math.floor(total_sell_tabdeal),
           ","
-        )} ریال\n\n⬆️ بهترین صرافی برای ${action} ${amountRequested} تتر ${
+        )} \n\n⬆️ بهترین صرافی برای ${action} ${amountRequested} تتر ${
           exchangeTranslations[bestExchange]
         } با قیمت کل ${formatThousands(
           Math.floor(maxPrice),
           ","
-        )} ریال است.\n\n 🗓${date}\n\n ${process.env.ID}`,
+        )}  است.\n\n 🗓${date}\n\n ${process.env.ID}`,
       };
     } else {
       maxPrice = Math.min(
