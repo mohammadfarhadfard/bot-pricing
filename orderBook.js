@@ -128,7 +128,7 @@ async function getOrderBook(action, amountRequested) {
         )} \n▪ تبدیل : ${formatThousands(
           Math.floor(total_sell_tabdeal),
           ","
-        )} \n\n⬆️ بهترین صرافی برای ${action} ${amountRequested} تتر ${
+        )} \n\n⬆️ بهترین صرافی برای ${action} ${amountRequested} تتر، ${
           exchangeTranslations[bestExchange]
         } با قیمت کل ${formatThousands(
           Math.floor(maxPrice),
@@ -170,7 +170,7 @@ async function getOrderBook(action, amountRequested) {
       )} \n▪ تبدیل : ${formatThousands(
         Math.floor(total_buy_tabdeal),
         ","
-      )} \n\n⬇️ بهترین صرافی برای ${action} ${amountRequested} تتر ${
+      )} \n\n⬇️ بهترین صرافی برای ${action} ${amountRequested} تتر، ${
         exchangeTranslations[bestExchange]
       } با قیمت کل ${formatThousands(
         Math.floor(maxPrice),
